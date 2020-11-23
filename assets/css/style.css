@@ -734,6 +734,16 @@ section .container {
 /*--------------------------------------------------------------
 # Portfolio
 --------------------------------------------------------------*/
+.article-link{
+color: blue;
+
+}
+
+.article-link:hover{
+color: white;
+}
+
+
 .portfolio .portfolio-item {
   margin-bottom: 30px;
 }
