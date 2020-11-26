@@ -884,7 +884,9 @@ color: white;
   color: #63eda3;
 }
 
-.portfolio .portfolio-wrap:hover::before {
+
+/*removed :hover from all .portfolio-wrap classes below*/
+.portfolio .portfolio-wrap::before {
   top: 0;
   left: 0;
   right: 0;
@@ -892,16 +894,16 @@ color: white;
   opacity: 1;
 }
 
-.portfolio .portfolio-wrap:hover .portfolio-info {
+.portfolio .portfolio-wrap .portfolio-info {
   opacity: 1;
 }
 
-.portfolio .portfolio-wrap:hover .portfolio-info::before {
+.portfolio .portfolio-wrap .portfolio-info::before {
   top: 15px;
   left: 15px;
 }
 
-.portfolio .portfolio-wrap:hover .portfolio-info::after {
+.portfolio .portfolio-wrap .portfolio-info::after {
   bottom: 15px;
   right: 15px;
 }
