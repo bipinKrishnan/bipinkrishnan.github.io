@@ -908,6 +908,11 @@ color: white;
   right: 15px;
 }
 
+@media (max-width: 500px){
+ .portfolio .portfolio-wrap .portfolio-info p {
+  text-transform: None;
+ }
+}
 /*--------------------------------------------------------------
 # Contact
 --------------------------------------------------------------*/
