@@ -287,7 +287,7 @@ h1, h2, h3, h4, h5, h6 {
 
 #header.header-top h1 {
   margin-right: auto;
-  font-size: 36px;
+  font-size: 20px;
 }
 
 #header.header-top .container {
@@ -304,7 +304,7 @@ h1, h2, h3, h4, h5, h6 {
     height: 60px;
   }
   #header.header-top h1 {
-    font-size: 26px;
+    font-size: 15px;
   }
 }
 
