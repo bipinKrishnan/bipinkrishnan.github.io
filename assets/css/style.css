@@ -1182,8 +1182,8 @@ color: white;
   bottom: 0;
   padding: 15px;
   text-align: right;
-  font-size: 13px;
-  color: #fff;
+  font-size: 10px;
+  color: gray;
   z-index: 999999;
 }
 
