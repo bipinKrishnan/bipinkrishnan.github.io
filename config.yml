@@ -1,6 +1,6 @@
 # config file edited from https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-installation/
 
-baseURL: http://example.org/
+baseURL: https://bipinkrishnan.github.io
 languageCode: en-us
 title: Bipin
 theme: PaperMod
