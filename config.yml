@@ -64,6 +64,8 @@ params:
       url: "https://medium.com/@bipin4338"
     - name: github
       url: "https://github.com/bipinkrishnan"
+    - name: other
+      url: "https://bipinkrishnan.github.io/ml-recipe-book"
 
   # for search
   # https://fusejs.io/api/options.html
@@ -81,10 +83,6 @@ menu:
       name: tags
       url: /tags/
       weight: 20
-    - identifier: example
-      name: ml book
-      url: https://bipinkrishnan.github.io/ml-recipe-book
-      weight: 30
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:
