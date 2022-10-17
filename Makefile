@@ -7,3 +7,7 @@ server:
 .PHONY: new-post
 new-post:
 		hugo new './content/posts/${new_post_md}'
+		
+.PHONY: build-site
+build-site:
+		hugo
