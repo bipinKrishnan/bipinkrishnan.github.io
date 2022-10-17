@@ -55,7 +55,7 @@ params:
   # home-info mode
   homeInfoParams:
     Title: "Hi there \U0001F44B"
-    Content: Welcome to my blog
+    Content: I'm exploring the world of machine learning and sharing the experience here
 
   socialIcons:
     - name: twitter
