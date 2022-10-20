@@ -1,8 +1,8 @@
 ---
-title: "Test post"
+title: "Sample post"
 date: 2022-06-22T20:51:54+05:30
 # change the draft to 'true' to unlist from the blog
-draft: false
+draft: true
 tags: 
   - test
 
@@ -11,8 +11,8 @@ TocOpen: false
 ---
 
 ## First heading
-sakalka
+qwerty keyboard
 
 ### Sub heading
-sjsksl
+asdf keyboard
 
