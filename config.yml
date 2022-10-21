@@ -7,6 +7,8 @@ theme: PaperMod
 paginate: 5
 publishDir: docs
 buildDrafts: false
+# relativeURLs: true
+# uglyURLs: true
 
 minify:
   disableXML: true
@@ -28,7 +30,7 @@ params:
   ShowShareButtons: true
   ShowPostNavLinks: true
   ShowBreadCrumbs: true
-  ShowCodeCopyButtons: false
+  ShowCodeCopyButtons: true
   ShowWordCount: false
   ShowRssButtonInSectionTermList: true
   UseHugoToc: true
@@ -55,7 +57,7 @@ params:
   # home-info mode
   homeInfoParams:
     Title: "Hi there \U0001F44B"
-    Content: I'm exploring the world of machine learning and sharing the experience here
+    Content: Sharing my adventures in the world of machine learning
 
   socialIcons:
     - name: twitter
@@ -79,10 +81,15 @@ params:
     keys: ["title", "permalink", "summary", "content"]
 menu:
   main:
+    - identifier: archives
+      name: archives
+      url: /archives/
+      weight: 20
     - identifier: tags
       name: tags
       url: /tags/
       weight: 20
+
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true
 markup:

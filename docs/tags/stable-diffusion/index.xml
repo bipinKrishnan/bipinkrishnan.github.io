@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>stable-diffusion on Bipin</title>
+    <link>https://bipinkrishnan.github.io/tags/stable-diffusion/</link>
+    <description>Recent content in stable-diffusion on Bipin</description>
+    <image>
+      <url>https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 20 Oct 2022 19:37:08 +0530</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/tags/stable-diffusion/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Getting Started in the World of Stable Diffusion</title>
+      <link>https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/</link>
+      <pubDate>Thu, 20 Oct 2022 19:37:08 +0530</pubDate>
+      
+      <guid>https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/</guid>
+      <description>This is series of blog posts of me trying to share what I&amp;rsquo;ve explored in the course &amp;lsquo;From Deep learning foundations to Stable Diffusion&amp;rsquo; by FastAI.
+Everything I share in this post is based on the initial lessons of the FastAI course, which is publicly available here. The lessons also have some accompanying jupyter notebooks on stable diffusion, which can be found in this Github repo.
+Let&amp;rsquo;s jump right into the post with the question: &amp;lsquo;What is stable diffusion?</description>
+    </item>
+    
+  </channel>
+</rss>

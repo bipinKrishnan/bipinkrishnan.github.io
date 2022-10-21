@@ -10,15 +10,16 @@
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 22 Jun 2022 20:51:54 +0530</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 20 Oct 2022 19:37:08 +0530</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Test post</title>
-      <link>https://bipinkrishnan.github.io/posts/test_post/</link>
-      <pubDate>Wed, 22 Jun 2022 20:51:54 +0530</pubDate>
+      <title>Getting Started in the World of Stable Diffusion</title>
+      <link>https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/</link>
+      <pubDate>Thu, 20 Oct 2022 19:37:08 +0530</pubDate>
       
-      <guid>https://bipinkrishnan.github.io/posts/test_post/</guid>
-      <description>First heading sakalka
-Sub heading sjsksl</description>
+      <guid>https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/</guid>
+      <description>This is series of blog posts of me trying to share what I&amp;rsquo;ve explored in the course &amp;lsquo;From Deep learning foundations to Stable Diffusion&amp;rsquo; by FastAI.
+Everything I share in this post is based on the initial lessons of the FastAI course, which is publicly available here. The lessons also have some accompanying jupyter notebooks on stable diffusion, which can be found in this Github repo.
+Let&amp;rsquo;s jump right into the post with the question: &amp;lsquo;What is stable diffusion?</description>
     </item>
     
   </channel>
