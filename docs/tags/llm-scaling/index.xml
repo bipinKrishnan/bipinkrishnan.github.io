@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Posts on 📌PinnedNotes</title>
-    <link>https://bipinkrishnan.github.io/posts/</link>
-    <description>Recent content in Posts on 📌PinnedNotes</description>
+    <title>llm-scaling on 📌PinnedNotes</title>
+    <link>https://bipinkrishnan.github.io/tags/llm-scaling/</link>
+    <description>Recent content in llm-scaling on 📌PinnedNotes</description>
     <image>
       <url>https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 23 Feb 2025 20:12:50 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 23 Feb 2025 20:12:50 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/tags/llm-scaling/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Quick Explainer: Activation Checkpointing</title>
       <link>https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/</link>
@@ -18,17 +18,6 @@
       
       <guid>https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/</guid>
       <description>What is activation checkpointing? Activation checkpointing is a technique used to save GPU memory while training large deep learning models. During the training of a deep learning model, we store the activations in memory to calculate the gradients during the backward pass. Activation checkpointing literally skips the saving part, thus saving a lot of memory. The figure below will give you an idea of the huge amount of memory consumed by activations while training a model:</description>
-    </item>
-    
-    <item>
-      <title>Getting Started in the World of Stable Diffusion</title>
-      <link>https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/</link>
-      <pubDate>Thu, 20 Oct 2022 19:37:08 +0530</pubDate>
-      
-      <guid>https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/</guid>
-      <description>This is series of blog posts of me trying to share what I&amp;rsquo;ve explored in the course &amp;lsquo;From Deep learning foundations to Stable Diffusion&amp;rsquo; by FastAI.
-Everything I share in this post is based on the initial lessons of the FastAI course, which is publicly available here. The lessons also have some accompanying jupyter notebooks on stable diffusion, which can be found in this Github repo.
-Let&amp;rsquo;s jump right into the post with the question: &amp;lsquo;What is stable diffusion?</description>
     </item>
     
   </channel>

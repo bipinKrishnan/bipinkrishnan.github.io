@@ -3,11 +3,11 @@
 <meta http-equiv=x-ua-compatible content="IE=edge">
 <meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
 <meta name=robots content="index, follow">
-<title>fastai-course | 📌PinnedNotes</title>
+<title>Quick Explainers | 📌PinnedNotes</title>
 <meta name=keywords content>
 <meta name=description content="Bipin's blog">
 <meta name=author content="Bipin Krishnan">
-<link rel=canonical href=https://bipinkrishnan.github.io/tags/fastai-course/>
+<link rel=canonical href=https://bipinkrishnan.github.io/tags/quick-explainer/>
 <link crossorigin=anonymous href=/assets/css/stylesheet.80f99cabbb3de64440a55e13c3af93619eaf6e0c2d7f8662f08e6b314c5a1e46.css integrity="sha256-gPmcq7s95kRApV4Tw6+TYZ6vbgwtf4Zi8I5rMUxaHkY=" rel="preload stylesheet" as=style>
 <link rel=icon href=https://bipinkrishnan.github.io/favicon.ico>
 <link rel=icon type=image/png sizes=16x16 href=https://bipinkrishnan.github.io/favicon-16x16.png>
@@ -16,7 +16,7 @@
 <link rel=mask-icon href=https://bipinkrishnan.github.io/safari-pinned-tab.svg>
 <meta name=theme-color content="#2e2e33">
 <meta name=msapplication-TileColor content="#2e2e33">
-<link rel=alternate type=application/rss+xml href=https://bipinkrishnan.github.io/tags/fastai-course/index.xml>
+<link rel=alternate type=application/rss+xml href=https://bipinkrishnan.github.io/tags/quick-explainer/index.xml>
 <noscript>
 <style>#theme-toggle,.top-link{display:none}</style>
 </noscript>
@@ -25,13 +25,13 @@
 <script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js integrity=sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR crossorigin=anonymous onload=renderMathInElement(document.body)></script>
 >
 <script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}]})})</script>
-<meta property="og:title" content="fastai-course">
+<meta property="og:title" content="Quick Explainers">
 <meta property="og:description" content="Bipin's blog">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://bipinkrishnan.github.io/tags/fastai-course/"><meta property="og:image" content="https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="og:site_name" content="📌PinnedNotes">
+<meta property="og:url" content="https://bipinkrishnan.github.io/tags/quick-explainer/"><meta property="og:image" content="https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="og:site_name" content="📌PinnedNotes">
 <meta name=twitter:card content="summary_large_image">
 <meta name=twitter:image content="https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
-<meta name=twitter:title content="fastai-course">
+<meta name=twitter:title content="Quick Explainers">
 <meta name=twitter:description content="Bipin's blog">
 </head>
 <body class="list dark" id=top>
@@ -53,7 +53,7 @@
 </li>
 <li>
 <a href=https://bipinkrishnan.github.io/tags/quick-explainer/ title=Explainers>
-<span>Explainers</span>
+<span class=active>Explainers</span>
 </a>
 </li>
 <li>
@@ -72,23 +72,23 @@
 <main class=main>
 <header class=page-header><div class=breadcrumbs><a href=https://bipinkrishnan.github.io>Home</a>&nbsp;»&nbsp;<a href=https://bipinkrishnan.github.io/tags/>Tags</a></div>
 <h1>
-fastai-course
+Quick Explainers
 <a href=index.xml title=RSS aria-label=RSS><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" height="23"><path d="M4 11a9 9 0 019 9"/><path d="M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1"/></svg>
 </a>
 </h1>
 </header>
+<div class=post-content><p><em>These posts are written with content as they come to my head with simple to no planning on the structure. Expect some rough edges ahead.</em></p>
+</div>
 <article class="post-entry tag-entry">
 <header class=entry-header>
-<h2>Getting Started in the World of Stable Diffusion
+<h2>Quick Explainer: Activation Checkpointing
 </h2>
 </header>
 <div class=entry-content>
-<p>This is series of blog posts of me trying to share what I’ve explored in the course ‘From Deep learning foundations to Stable Diffusion’ by FastAI.
-Everything I share in this post is based on the initial lessons of the FastAI course, which is publicly available here. The lessons also have some accompanying jupyter notebooks on stable diffusion, which can be found in this Github repo.
-Let’s jump right into the post with the question: ‘What is stable diffusion?...</p>
+<p>What is activation checkpointing? Activation checkpointing is a technique used to save GPU memory while training large deep learning models. During the training of a deep learning model, we store the activations in memory to calculate the gradients during the backward pass. Activation checkpointing literally skips the saving part, thus saving a lot of memory. The figure below will give you an idea of the huge amount of memory consumed by activations while training a model:...</p>
 </div>
-<footer class=entry-footer><span title="2022-10-20 19:37:08 +0530 +0530">October 20, 2022</span>&nbsp;·&nbsp;10 min&nbsp;·&nbsp;Bipin Krishnan</footer>
-<a class=entry-link aria-label="post link to Getting Started in the World of Stable Diffusion" href=https://bipinkrishnan.github.io/posts/getting-started-in-the-world-of-stable-diffusion/></a>
+<footer class=entry-footer><span title="2025-02-23 20:12:50 +0000 UTC">February 23, 2025</span>&nbsp;·&nbsp;8 min&nbsp;·&nbsp;Bipin Krishnan</footer>
+<a class=entry-link aria-label="post link to Quick Explainer: Activation Checkpointing" href=https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/></a>
 </article>
 </main>
 <footer class=footer>
