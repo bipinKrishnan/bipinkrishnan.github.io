@@ -2,7 +2,7 @@
 
 baseURL: https://bipinkrishnan.github.io
 languageCode: en-us
-title: Bipin
+title: "\U0001F4CCPinnedNotes"
 theme: PaperMod
 paginate: 5
 publishDir: docs
@@ -16,15 +16,16 @@ minify:
 
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
-  title: Bipin
+  title: "\U0001F4CCPinnedNotes"
   description: Bipin's blog
-  keywords: [Blog, Portfolio, PaperMod]
-  author: Bipin Krishnan P
+  keywords: [Blog, Portfolio, PaperMod, MachineLearning, LLM, CUDA, MLEngineering]
+  author: Bipin Krishnan
   # author: ["Me", "You"] # multiple authors
   images: ["<link or path of image for opengraph, twitter-cards>"]
   DateFormat: "January 2, 2006"
-  defaultTheme: auto # dark, light
+  defaultTheme: dark # dark, light, auto
   disableThemeToggle: false
+  math: true
 
   ShowReadingTime: true
   ShowShareButtons: true
@@ -52,22 +53,27 @@ params:
   #   safari_pinned_tab: "<link / abs url>"
 
   label:
-    text: "Bipin"
+    text: "\U0001F4CCPinnedNotes"
 
   # home-info mode
   homeInfoParams:
     Title: "Hi there \U0001F44B"
-    Content: Sharing my adventures in the world of machine learning
+    Content: |
+      My interest revolve around CUDA and LLM scaling. Expect a mix of long-form posts and quick-explainers here.
 
   socialIcons:
     - name: twitter
       url: "https://twitter.com/bkrish_"
+    - name: linkedin
+      url: "https://www.linkedin.com/in/bipin-krishnan/"
     - name: medium
       url: "https://medium.com/@bipin4338"
     - name: github
       url: "https://github.com/bipinkrishnan"
     - name: other
       url: "https://bipinkrishnan.github.io/ml-recipe-book"
+    - name: rss
+      url: "/index.xml"
 
   # for search
   # https://fusejs.io/api/options.html
@@ -81,14 +87,22 @@ params:
     keys: ["title", "permalink", "summary", "content"]
 menu:
   main:
+    - identifier: long-posts
+      name: Long Posts
+      url: /tags/long-post/
+      weight: 20
+    - identifier: quick-explainers
+      name: Explainers
+      url: /tags/quick-explainer/
+      weight: 30
     - identifier: archives
-      name: archives
+      name: Archives
       url: /archives/
-      weight: 20
+      weight: 40
     - identifier: tags
-      name: tags
+      name: Tags
       url: /tags/
-      weight: 20
+      weight: 40
 
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
 pygmentsUseClasses: true

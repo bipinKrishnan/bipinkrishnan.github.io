@@ -7,6 +7,7 @@ TocOpen: false
 tags: 
   - stable-diffusion
   - fastai-course
+  - long-post
 ---
 
 _This is series of blog posts of me trying to share what I've explored in the course '[From Deep learning foundations to Stable Diffusion](https://www.fast.ai/posts/part2-2022.html)' by FastAI._
