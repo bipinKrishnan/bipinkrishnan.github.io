@@ -13,7 +13,7 @@ tags:
 
 Activation checkpointing is a technique used to save GPU memory while training large deep learning models. During the training of a deep learning model, we store the activations in memory to calculate the gradients during the backward pass. Activation checkpointing literally skips the saving part, thus saving a lot of memory. The figure below will give you an idea of the huge amount of memory consumed by activations while training a model:
 
-![Activation checkpointing cation="test"](/quick_explainers/activation_checkpointing/memory_comp_chart.png)
+![Activation checkpointing](/quick_explainers/activation_checkpointing/memory_comp_chart.png)
 *Source: The Ultra-Scale Playbook -
 Training LLMs on GPU Clusters*
 
