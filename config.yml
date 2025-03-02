@@ -59,7 +59,7 @@ params:
   homeInfoParams:
     Title: "Hi there \U0001F44B"
     Content: |
-      My interest revolve around CUDA and LLM scaling. Expect a mix of long-form posts and quick-explainers here.
+      My interests revolve around CUDA and LLM scaling. Expect a mix of long-form posts and quick-explainers here.
 
   socialIcons:
     - name: twitter
