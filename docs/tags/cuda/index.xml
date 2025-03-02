@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Quick Explainers on 📌PinnedNotes</title>
-    <link>https://bipinkrishnan.github.io/tags/quick-explainer/</link>
-    <description>Recent content in Quick Explainers on 📌PinnedNotes</description>
+    <title>cuda on 📌PinnedNotes</title>
+    <link>https://bipinkrishnan.github.io/tags/cuda/</link>
+    <description>Recent content in cuda on 📌PinnedNotes</description>
     <image>
       <url>https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
       <link>https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 24 Feb 2025 22:00:49 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/tags/quick-explainer/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 01 Mar 2025 13:18:55 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/tags/cuda/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Quick Explainer: GPU Programming with CUDA and Triton</title>
       <link>https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/</link>
@@ -19,15 +19,6 @@
       <guid>https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/</guid>
       <description>What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.
 Not every machine learning person is an expert in using low-level programming languages supported by CUDA.</description>
-    </item>
-    
-    <item>
-      <title>Quick Explainer: Activation Checkpointing</title>
-      <link>https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/</link>
-      <pubDate>Sun, 23 Feb 2025 20:12:50 +0000</pubDate>
-      
-      <guid>https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/</guid>
-      <description>What is activation checkpointing? Activation checkpointing is a technique used to save GPU memory while training large deep learning models. During the training of a deep learning model, we store the activations in memory to calculate the gradients during the backward pass. Activation checkpointing literally skips the saving part, thus saving a lot of memory. The figure below will give you an idea of the huge amount of memory consumed by activations while training a model:</description>
     </item>
     
   </channel>

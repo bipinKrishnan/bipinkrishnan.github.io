@@ -10,7 +10,17 @@
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 23 Feb 2025 20:12:50 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 01 Mar 2025 13:18:55 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Quick Explainer: GPU Programming with CUDA and Triton</title>
+      <link>https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/</link>
+      <pubDate>Sat, 01 Mar 2025 13:18:55 +0000</pubDate>
+      
+      <guid>https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/</guid>
+      <description>What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.
+Not every machine learning person is an expert in using low-level programming languages supported by CUDA.</description>
+    </item>
+    
     <item>
       <title>Quick Explainer: Activation Checkpointing</title>
       <link>https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/</link>

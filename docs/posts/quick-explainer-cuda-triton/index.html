@@ -1,0 +1,657 @@
+<!doctype html><html lang=en dir=auto>
+<head><meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name=robots content="index, follow">
+<title>Quick Explainer: GPU Programming with CUDA and Triton | 📌PinnedNotes</title>
+<meta name=keywords content="quick-explainer,cuda,openai-triton">
+<meta name=description content="What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.
+Not every machine learning person is an expert in using low-level programming languages supported by CUDA.">
+<meta name=author content="Bipin Krishnan">
+<link rel=canonical href=https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/>
+<link crossorigin=anonymous href=/assets/css/stylesheet.80f99cabbb3de64440a55e13c3af93619eaf6e0c2d7f8662f08e6b314c5a1e46.css integrity="sha256-gPmcq7s95kRApV4Tw6+TYZ6vbgwtf4Zi8I5rMUxaHkY=" rel="preload stylesheet" as=style>
+<script defer crossorigin=anonymous src=/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG+9vmJ0cTS+ovo0FeA=" onload=hljs.initHighlightingOnLoad()></script>
+<link rel=icon href=https://bipinkrishnan.github.io/favicon.ico>
+<link rel=icon type=image/png sizes=16x16 href=https://bipinkrishnan.github.io/favicon-16x16.png>
+<link rel=icon type=image/png sizes=32x32 href=https://bipinkrishnan.github.io/favicon-32x32.png>
+<link rel=apple-touch-icon href=https://bipinkrishnan.github.io/apple-touch-icon.png>
+<link rel=mask-icon href=https://bipinkrishnan.github.io/safari-pinned-tab.svg>
+<meta name=theme-color content="#2e2e33">
+<meta name=msapplication-TileColor content="#2e2e33">
+<noscript>
+<style>#theme-toggle,.top-link{display:none}</style>
+</noscript>
+<link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.css integrity=sha384-MlJdn/WNKDGXveldHDdyRP1R4CTHr3FeuDNfhsLPYrq2t0UBkUdK2jyTnXPEK1NQ crossorigin=anonymous>
+<script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.min.js integrity=sha384-VQ8d8WVFw0yHhCk5E8I86oOhv48xLpnDZx5T9GogA/Y84DcCKWXDmSDfn13bzFZY crossorigin=anonymous></script>
+<script defer src=https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.min.js integrity=sha384-+XBljXPPiv+OzfbB3cVmLHf4hdUFHlWNZN5spNQ7rmHTXpd7WvJum6fIACpNNfIR crossorigin=anonymous onload=renderMathInElement(document.body)></script>
+>
+<script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}]})})</script>
+<meta property="og:title" content="Quick Explainer: GPU Programming with CUDA and Triton">
+<meta property="og:description" content="What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.
+Not every machine learning person is an expert in using low-level programming languages supported by CUDA.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/"><meta property="og:image" content="https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta property="article:section" content="posts">
+<meta property="article:published_time" content="2025-03-01T13:18:55+00:00">
+<meta property="article:modified_time" content="2025-03-01T13:18:55+00:00"><meta property="og:site_name" content="📌PinnedNotes">
+<meta name=twitter:card content="summary_large_image">
+<meta name=twitter:image content="https://bipinkrishnan.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name=twitter:title content="Quick Explainer: GPU Programming with CUDA and Triton">
+<meta name=twitter:description content="What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.
+Not every machine learning person is an expert in using low-level programming languages supported by CUDA.">
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":2,"name":"Posts","item":"https://bipinkrishnan.github.io/posts/"},{"@type":"ListItem","position":3,"name":"Quick Explainer: GPU Programming with CUDA and Triton","item":"https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/"}]}</script>
+<script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Quick Explainer: GPU Programming with CUDA and Triton","name":"Quick Explainer: GPU Programming with CUDA and Triton","description":"What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.\nNot every machine learning person is an expert in using low-level programming languages supported by CUDA.","keywords":["quick-explainer","cuda","openai-triton"],"articleBody":"What is CUDA and Triton? CUDA (Compute Unified Device Architecture) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.\nNot every machine learning person is an expert in using low-level programming languages supported by CUDA. This is where OpenAI’s Triton comes into play. To give you a glimpse of what Triton stands for, here is an extract from their official release note:\n We’re releasing Triton 1.0, an open-source Python-like programming language which enables researchers with no CUDA experience to write highly efficient GPU code—most of the time on par with what an expert would be able to produce.\n The code we write in low-level CUDA and Triton are both compiled to PTX (Parallel Thread eXecution) format, before being executed on the GPU.\nThe action plan for today is to:\n Write a simple vector addition program in standard C — keeping it old school. Level up by re-writing the same program in CUDA C to harness the power of parallelism. Take it a step further: tweak our CUDA kernel so it can be loaded and executed seamlessly within PyTorch. This is where we make use of PyTorch C++ extension API. Finally, swap out the low-level CUDA code for Triton and use it with PyTorch.  Simple vector addition in standard C You might want to brush up your skills on arrays and pointers because we are going to use it a lot moving forward.\nBelow is the python equivalent of the C code that we will be writing for vector addition. We define two arrays, iterate through each of their elements, add them and append the result to a third array:\nARRAY_LEN = 5 def vectAdd(a, b, c, arr_len): for i in range(arr_len): c.append(a[i] + b[i]) def main(): # define two lists/vectors vectA = [1, 2, 3, 4, 5] vectB = [4, 5, 3, 3, 5] # outputs are appended here vectC = [] # loop through each item, add them and append to vectC vectAdd(vectA, vectB, vectC, ARRAY_LEN) # print the vector addition result print(vectC) if __name__ == \"__main__\": main() Here is the equivalent C code for vector addition (save the code in vectAdd.c):\n#include  #define ARRAY_LEN 5  // takes in 3 arrays and the number of elements in the array void vectAdd(int *a, int *b, int *c, int len) { // loop through each item in `a` and `b`,  // add them and append to `c`  for(int i=0; ilen; i++) { c[i] = a[i] + b[i]; } } int main() { // define two arrays/vectors of length `ARRAY_LEN`  int vectA[ARRAY_LEN] = {1, 2, 3, 4, 5}; int vectB[ARRAY_LEN] = {4, 5, 3, 3, 5}; // outputs are appended here  int vectC[ARRAY_LEN]; // loop through each item, add them and append to `vectC`  vectAdd(vectA, vectB, vectC, ARRAY_LEN); // print the vector addition result  for(int i=0; iARRAY_LEN; i++) { printf(\"%d\\n\", vectC[i]); } return 0; } For those who are wondering, we cannot directly print an array in C as we do in python. So to print the final result of vector addition, we will have to iterate through each element in vectC, and print them one after the other.\nYou can compile the C code using gcc which comes built-in with most of the linux distros. Just run gcc vecAdd.c -o vecAdd.out which will create an executable called vecAdd.out. You can then run ./vecAdd.out to get the result of vector addition.\nDiving into CUDA A quick refresher on CUDA basics Now we will take it a step further and parallelize the vector addition program using CUDA. But before that we will do a quick walk through of CUDA basics. If you feel like digging into the details of anything discussed here, you can always checkout the CUDA refresher series from NVIDIA.\nSince we are dealing with vector addition, consider the example of two vectors A = [1, 2, 3, 4, 5], B = [4, 5, 3, 3, 5], and an empty placeholder vector C = [] for storing the result of vector addition. Earlier in standard C, we iterated over each element sequentially and added them. But now we have the power of parallelism since we are running our vector addition on a GPU.\nThis is how we could parallelize vector addition of A and B using the power of threads in GPU:\n Let’s start 5 threads for now since we have 5 items in A and B. Each of these 5 thread will be executed in parallel on the GPU. In our program , each thread will only execute one operation, and that is A[i] + B[i] and store it in C[i]. For the above step, assume that i is the index of the thread, which will be 0 for the first thread, 1 for the second thread and so on.  Here’s the illustrated version of the above steps:\nInput Vectors: A: [ 1 2 3 4 5 ] B: [ 4 5 3 3 5 ] Threads (T0 - T4) execute in parallel: T0: C[0] = A[0] + B[0] → C[0] = 5 T1: C[1] = A[1] + B[1] → C[1] = 7 T2: C[2] = A[2] + B[2] → C[2] = 6 T3: C[3] = A[3] + B[3] → C[3] = 7 T4: C[4] = A[4] + B[4] → C[4] = 10 Result stored in output vector: C: [ 5 7 6 7 10 ] Thus we have a conceptual view of how we could transform a sequential program to a parallel program.\nHere are some technical details that you might want to know:\n  In a CUDA program, the CPU is called the host and GPU is called the device. To avoid confusions and bugs, variable names defined in the host are prepended with h_ and variables defined in the device are prepended with d_. For example the variable inpArray defined in host should be h_inpArray and inpArray defined in device should be d_inpArray.\n  The functions with __host__ qualifier or without any qualifier are executed on the host and functions with __device__ qualifier are executed on the device. The functions with __global__ qualifier are launched from the host and executed on the device with the specified number of threads. Usually GPU kernels are written with __global__ qualifier.\n  // executed on the CPU void randFunc1() { ... } // executed on the CPU __host__ void randFunc2() { ... } // executed on the GPU __device__ void randFunc3() { ... } // launched from the CPU and executed on the GPU // This is a GPU kernel __global__ void randFunc4() { ... }  This is the workflow of a CUDA program:\na. We define a kernel with __global__ qualifier.\nb. We define the input variables on the host memory.\nc. We transfer the input variables from host to device memory.\nd. We launch the kernel with the specified number of threads, along with the input variables.\ne. We transfer the resulting output variables from device to host memory.\nf. Free the device memory.\n  Earlier in our illustrated example, we refer to 5 threads with 5 index values. We need these values to perform the addition operation. But how do we get this value from inside a kernel? For this, we need to know how grids, blocks and threads are organized in the CUDA programming model. In the most simplest language, multiple threads are grouped together to form a block and multiple blocks are grouped together to form a grid.\nFigure 1: Organization of blocks and threads in CUDA programming model\nIn Figure 1, we have 3 blocks along X and Y directions. Each block has 5 threads along X and Y directions. This is the formula to calculate the index for our vector addition example:\n$$ \\text{index} = \\text{blockIdx.x} \\times \\text{blockDim.x} + \\text{threadIdx.x} $$\nFor the thread marked in the figure— the index of the block is 2 (along X), block dimension is 5 (there are 5 threads in a block) and the thread index is 0. So, index for the kernel can be calculated as:\n$$ \\text{index} = 2 \\times 5 + 0 = 10 $$\nThus, this thread will compute the sum of 11th element (indexing starts from 0) of A and 11th element of B (we only have 5 elements here though) and store the result as the 11th element of C.\nRolling up your sleeves: Writing CUDA code for vector addition Now we have the basics of how parallel programs are written. Let’s change our standard C code from earlier section to a CUDA kernel.\nWe’ll re-write the vectAdd function to run only the addition of one element inside it (save it in vectAdd.cu).:\n#include #include  // vector addition GPU kernel __global__ void vectAdd(int *d_inpA, int *d_inpB, int *d_outC, int arrLen) { // we use this index to get the element from the array  int idx = blockIdx.x * blockDim.x + threadIdx.x; // do computation only if the index is less than the array length  if (idx  arrLen){ d_outC[idx] = d_inpA[idx] + d_inpB[idx]; } } The cuda.h header file has all the necessary definitions for the CUDA programming model. The __global__ qualifier, blockIdx.x, blockDim.x and threadIdx.x are all from this header file.\nEach thread in the GPU will have a copy of the above kernel and will be executed in parallel. Now let’s complete our CUDA program by including the main() function from where we will launch the GPU kernel (save it in vectAdd.cu along with the GPU kernel):\n#define ARRAY_LEN 5  int main() { // define the no. of blocks and threads  // required for the kernel launch  int nThreads = 5; int nBlocks = 1; // define the input and output vectors in host  int h_vectA[ARRAY_LEN] = {1, 2, 3, 4, 5}; int h_vectB[ARRAY_LEN] = {4, 5, 3, 3, 5}; int h_vectC[ARRAY_LEN]; // pointers to store the memory address of data in device  int *d_vectA; int *d_vectB; int *d_vectC; // `int` occupies 4 bytes in memory, so `arrSize` will be 20 bytes  int arrSize = sizeof(int) * ARRAY_LEN; // allocate the memory in GPU for inputs and outputs  cudaMalloc((void**) \u0026d_vectA, arrSize); cudaMalloc((void**) \u0026d_vectB, arrSize); cudaMalloc((void**) \u0026d_vectC, arrSize); // copy the data from host to device  cudaMemcpy(d_vectA, h_vectA, arrSize, cudaMemcpyHostToDevice); cudaMemcpy(d_vectB, h_vectB, arrSize, cudaMemcpyHostToDevice); // launch the kernel  vectAdd nBlocks, nThreads(d_vectA, d_vectB, d_vectC, ARRAY_LEN); // copy the output data from device to host  cudaMemcpy(h_vectC, d_vectC, arrSize, cudaMemcpyDeviceToHost); // free the memory allocated in device  cudaFree(d_vectA); cudaFree(d_vectB); cudaFree(d_vectC); // print the vector addition result  for(int i=0; iARRAY_LEN; i++) { printf(\"%d\\n\", h_vectC[i]); } return 0; } The CUDA code above can be compiled and executed using NVCC (Nvidia CUDA Compiler) using the command nvcc vectAdd.cu -o vectAdd.out \u0026\u0026 ./vectAdd.out.\nHere are some extra notes that might explain the GPU code better:\n We define three pointers, d_vectA, d_vectB and d_vectC. If we print these pointers before calling cudaMalloc, the values will be (nil). After running cudaMalloc((void**) \u0026d_vectA, arrSize), the value of d_vectA will be a memory address. Under the hood cudaMalloc allocated memory in the GPU of size arrSize and assigned this address as the value of d_vectA. Let’s confirm this by printing out stuff from the original main function:  int main() { ... // `int` occupies 4 bytes in memory, so `arrSize` will be 20 bytes in memory  int arrSize = sizeof(int) * ARRAY_LEN; printf(\"Before memory allocation:\\n\"); printf(\"Address stored in `d_vectA`: %p\\n\", d_vectA); printf(\"Address stored in `d_vectB`: %p\\n\", d_vectB); printf(\"Address stored in `d_vectC`: %p\\n\", d_vectC); // allocate the memory in GPU for inputs and outputs  cudaMalloc((void**) \u0026d_vectA, arrSize); cudaMalloc((void**) \u0026d_vectB, arrSize); cudaMalloc((void**) \u0026d_vectC, arrSize); printf(\"After memory allocation:\\n\"); printf(\"Address stored in `d_vectA`: %p\\n\", d_vectA); printf(\"Address stored in `d_vectB`: %p\\n\", d_vectB); printf(\"Address stored in `d_vectC`: %p\\n\", d_vectC); ... return 0; } ///////////////////// OUTPUT /////////////////////  /* This is a sample output from running the above print statements (the exact memory address may vary): Before memory allocation: Address stored in the pointer `d_vectA`: (nil) Address stored in the pointer `d_vectB`: (nil) Address stored in the pointer `d_vectC`: (nil) After memory allocation: Address stored in the pointer `d_vectA`: 0x502c00000 Address stored in the pointer `d_vectB`: 0x502c00200 Address stored in the pointer `d_vectC`: 0x502c00400 */  cudaMemcpy with cudaMemcpyHostToDevice as argument copies the data from host to device, whereas cudaMemcpy with cudaMemcpyDeviceToHost as argument copies the data from device to host.\n  Launching a GPU kernel is as simple as calling kernelName  (args);. In our case, it is vectAdd  (d_vectA, d_vectB, d_vectC, ARRAY_LEN);\n  After the kernel execution is over and the results are copied from device to host, we call cudaFree to free the device memory allocated for d_vectA, d_vectB and d_vectC.\n  Using PyTorch C++ extension API to load CUDA kernels I used Google Colab for this part to skip messing up with dependency installation issues. If you are on Google Colab with GPU, run sudo apt install ninja-build and restart the session before running any code.\nWe are going to use torch.utils.cpp_extension.load_inline to load the CUDA kernel from PyTorch python API.\nOn a high level, this is how are going to load the cuda kernel with PyTorch:\nimport torch from torch.utils.cpp_extension import load_inline cuda_src = # some cuda code cpp_src = # some c++ code # load the low-level CUDA and C++ code module = load_inline( name=\"vectAdd\", cuda_sources=[cuda_src], cpp_sources=[cpp_src], functions=[\"vect_add\"], with_cuda=True, # nvcc compiler flag for optimization level extra_cuda_cflags=[\"-O2\"], ) # input tensors for vector addition x = torch.tensor([1, 2, 3, 4], dtype=torch.int, device=\"cuda\") y = torch.tensor([1, 2, 6, 4], dtype=torch.int, device=\"cuda\") # call the vector addition function res = module.vect_add(x, y) print(res) ## Output: tensor([2, 4, 9, 8], device='cuda:0', dtype=torch.int32) The only part left to fill in are the cuda_src and cpp_src. Let’s do that now.\nThis is the cpp_src for us:\ncpp_src = \"torch::Tensor vect_add(torch::Tensor x, torch::Tensor y);\" We declare the C++ function vect_add that takes in two tensors as input. Think of it as the template for the function that we are going to define inside cuda_src. The API for torch in C++ is almost similar to python, mostly the dot notations like torch.Tensor are replaced with torch::Tensor. We will see more of this when we define our function in cuda_src below.\nWe will save the code for cuda_src in the file vectAddTorch.cu and then use pathlib’s read_text() function to read it as a string.\nThis is the cuda_src for us (save this in vectAddTorch.cu):\n// GPU kernel __global__ void vectAddKernel(int *a, int *b, int *c, int len) { int idx = blockIdx.x * blockDim.x + threadIdx.x; if (idx  len) { c[idx] = a[idx] + b[idx]; } } // define the C++ function declared in `cpp_src` torch::Tensor vect_add(torch::Tensor x, torch::Tensor y) { // get the number of elements in the tensor  int size = x.numel(); // no. of threads \u0026 blocks for launching the kernel  int n_threads = 5; int n_blocks = 1; // create an empty tensor to store the results of  // vector addition  torch::Tensor out = torch::empty_like(x); // launch the vector addition kernel  // pass the pointer to `x`, `y` and `out` along with the size  vectAddKernel n_blocks, n_threads (x.data_ptrint(), y.data_ptrint(), out.data_ptrint(), size); // return the result  return out; } So instead of the main() function from the previous iteration, we now use the power of PyTorch’s C++ API to define a function vect_add that takes in pytorch tensors and launches the vector addition GPU kernel and returns the result as a PyTorch tensor.\nLet’s now complete our python code to load the CUDA kernel (save this in vectAddTorch.py):\nfrom pathlib import Path import torch from torch.utils.cpp_extension import load_inline # added the `cuda_src` and `cpp_src` cuda_src = Path(\"vectAddTorch.cu\").read_text() cpp_src = \"torch::Tensor vect_add(torch::Tensor x, torch::Tensor y);\" # load the low-level CUDA and C++ code module = load_inline( name=\"vectAdd\", cuda_sources=[cuda_src], cpp_sources=[cpp_src], functions=[\"vect_add\"], with_cuda=True, # nvcc compiler flag for optimization level extra_cuda_cflags=[\"-O2\"], ) # input tensors for vector addition x = torch.tensor([1, 2, 3, 4], dtype=torch.int, device=\"cuda\") y = torch.tensor([1, 2, 6, 4], dtype=torch.int, device=\"cuda\") # vector addition function res = module.vect_add(x, y) print(res) ## Output: tensor([2, 4, 9, 8], device='cuda:0', dtype=torch.int32) Replacing low-level CUDA code with Triton This part will be a lot more easier since we already know the CUDA programming model. We will define a triton kernel using a python like syntax and use it directly from PyTorch without us having to bother about the low-level CUDA code.\nEvery triton kernel is decorated with triton.jit decorator. This compiles the function just-in-time using the triton compiler. But we don’t have to worry about this for now, we just decorate our kernel with triton.jit and the rest is handled by triton.\nTriton abstracts away the concept of threads, thus, triton functions are executed on a block of data rather than on a single element. Here is an illustration of how triton works when we launch a vector addition kernel with only two blocks:\nInput Vectors: A: [ 1 2 3 4 ] B: [ 4 5 3 3 ] Blocks (B1 - B2) execute in parallel: B1: C[0: 2] = A[0: 2] + B[0: 2] → C[0: 2] = [ 5 7 ] B2: C[2: 4] = A[2: 4] + B[2: 4] → C[2: 4] = [ 6 7 ] Result stored in output vector: C: [ 5 7 6 7 ] Let’s assume that we would like to do a vector addition of two tensors with 4 elements each. The triton kernel can be written as follows (save it in vectAddTriton.py):\nimport os import triton import triton.language as tl # env variable for debugging triton os.environ[\"TRITON_INTERPRET\"] = \"1\" # triton kernel for vector addition @triton.jit def vect_add_kernel( x_ptr, y_ptr, out_ptr, BLOCK_SIZE: tl.constexpr, num_elements: int, ): # get the program id, similar to `idx` in CUDA kernel pid = tl.program_id(axis=0) # get the start and end of the block block_start = pid * BLOCK_SIZE offset = block_start + tl.arange(0, BLOCK_SIZE) # we don't do any computation on indices where mask is false mask = offset  num_elements # load the input tensors as a block x = tl.load(x_ptr + offset, mask=mask) y = tl.load(y_ptr + offset, mask=mask) print(x, y) # vector addition on the loaded block of data output = x + y # store the output tl.store(out_ptr + offset, output, mask=mask) If we were to launch the above kernel with two vectors x = [1, 2, 3, 4] and y = [5, 6, 7, 8], BLOCK_SIZE=2 and the number of blocks as 3. Each of the 3 blocks will get 2 elements to run the vector addition. If we print the pid, block_start, offset, mask and data blocks while running the kernel, it will be as follows:\n### BLOCK_SIZE = 2 ### NUM_BLOCKS = 3 ### x = [1, 2, 3, 4] ### y = [5, 6, 7, 8] PID: [0] Block start: [0] # pid * BLOCK_SIZE Offset: [0 1] # block_start + tl.arange(0, BLOCK_SIZE) Mask: [ True True] # offset Data block from x: [1 2] Data block from y: [5 6] Output block: [6 8] PID: [1] Block start: [2] Offset: [2 3] Mask: [ True True] Data block from x: [3 4] Data block from y: [7 8] Output block: [10 12] PID: [2] Block start: [4] Offset: [4 5] Mask: [False False] Data block from x: [0 0] Data block from y: [0 0] Output block: [0 0] Finally, let’s add in the function that passes the input tensors and launch the kernel (save it in vectAddTriton.py):\nimport torch DEVICE = \"cuda:0\" BLOCK_SIZE = 2 def add(x: torch.Tensor, y: torch.Tensor): assert x.device == y.device == torch.device(DEVICE) # output of vector addition is stored here output = torch.empty_like(x) # launch the kernel with 3 blocks along X axis  # (only along X axis because we are dealing with 1D tensor here) vect_add_kernel[(3,)](x, y, output, BLOCK_SIZE, num_elements=x.numel()) return output if __name__ == \"__main__\": x = torch.tensor([1, 2, 3, 4], device=DEVICE) y = torch.tensor([5, 6, 7, 8], device=DEVICE) res = add(x, y) print(res) ## Output: tensor([ 6, 8, 10, 12], device='cuda:0') We can run the the above code including the triton kernel as a normal python script. Setting the environment variable \"TRITON_INTERPRET\" allows us to print stuff and set breakpoints while running the triton kernel. You can read more about debugging triton kernels here.\nWe finally made it to the end of this post after going through a whole lot of C, CUDA, C++ and Triton. This was just a glimpse of the huge GPU programming landscape. I’ve deliberately left the kernel profiling and benchmarking steps, this can be considered as a potential next step for the readers.\nAll the code used in this post can found here.\nUseful resources [1] “Gpu-Mode/Lectures: Material for Gpu-Mode Lectures”. GitHub. 2025.\n[2] “Vector Addition — Triton Documentation”. Triton-Lang.org. 2020.\n","wordCount":"3467","inLanguage":"en","datePublished":"2025-03-01T13:18:55Z","dateModified":"2025-03-01T13:18:55Z","author":{"@type":"Person","name":"Bipin Krishnan"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://bipinkrishnan.github.io/posts/quick-explainer-cuda-triton/"},"publisher":{"@type":"Organization","name":"📌PinnedNotes","logo":{"@type":"ImageObject","url":"https://bipinkrishnan.github.io/favicon.ico"}}}</script>
+</head>
+<body class=dark id=top>
+<script>localStorage.getItem("pref-theme")==="light"&&document.body.classList.remove('dark')</script>
+<header class=header>
+<nav class=nav>
+<div class=logo>
+<a href=https://bipinkrishnan.github.io accesskey=h title="📌PinnedNotes (Alt + H)">📌PinnedNotes</a>
+<div class=logo-switches>
+<button id=theme-toggle accesskey=t title="(Alt + T)"><svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg><svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentcolor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+</button>
+</div>
+</div>
+<ul id=menu>
+<li>
+<a href=https://bipinkrishnan.github.io/tags/long-post/ title="Long Posts">
+<span>Long Posts</span>
+</a>
+</li>
+<li>
+<a href=https://bipinkrishnan.github.io/tags/quick-explainer/ title=Explainers>
+<span>Explainers</span>
+</a>
+</li>
+<li>
+<a href=https://bipinkrishnan.github.io/archives/ title=Archives>
+<span>Archives</span>
+</a>
+</li>
+<li>
+<a href=https://bipinkrishnan.github.io/tags/ title=Tags>
+<span>Tags</span>
+</a>
+</li>
+</ul>
+</nav>
+</header>
+<main class=main>
+<article class=post-single>
+<header class=post-header>
+<div class=breadcrumbs><a href=https://bipinkrishnan.github.io>Home</a>&nbsp;»&nbsp;<a href=https://bipinkrishnan.github.io/posts/>Posts</a></div>
+<h1 class=post-title>
+Quick Explainer: GPU Programming with CUDA and Triton
+</h1>
+<div class=post-meta><span title="2025-03-01 13:18:55 +0000 UTC">March 1, 2025</span>&nbsp;·&nbsp;17 min&nbsp;·&nbsp;Bipin Krishnan
+</div>
+</header> <div class=toc>
+<details>
+<summary accesskey=c title="(Alt + C)">
+<span class=details>Table of Contents</span>
+</summary>
+<div class=inner><nav id=TableOfContents>
+<ul>
+<li><a href=#what-is-cuda-and-triton>What is CUDA and Triton?</a></li>
+<li><a href=#simple-vector-addition-in-standard-c>Simple vector addition in standard C</a></li>
+<li><a href=#diving-into-cuda>Diving into CUDA</a>
+<ul>
+<li><a href=#a-quick-refresher-on-cuda-basics>A quick refresher on CUDA basics</a></li>
+<li><a href=#rolling-up-your-sleeves-writing-cuda-code-for-vector-addition>Rolling up your sleeves: Writing CUDA code for vector addition</a></li>
+<li><a href=#using-pytorch-c-extension-api-to-load-cuda-kernels>Using PyTorch C++ extension API to load CUDA kernels</a></li>
+</ul>
+</li>
+<li><a href=#replacing-low-level-cuda-code-with-triton>Replacing low-level CUDA code with Triton</a></li>
+<li><a href=#useful-resources>Useful resources</a></li>
+</ul>
+</nav>
+</div>
+</details>
+</div>
+<div class=post-content><h2 id=what-is-cuda-and-triton>What is CUDA and Triton?<a hidden class=anchor aria-hidden=true href=#what-is-cuda-and-triton>#</a></h2>
+<p><a href=https://en.wikipedia.org/wiki/CUDA>CUDA (Compute Unified Device Architecture)</a> was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.</p>
+<p>Not every machine learning person is an expert in using low-level programming languages supported by CUDA. This is where <a href=https://github.com/triton-lang/triton>OpenAI&rsquo;s Triton</a> comes into play. To give you a glimpse of what Triton stands for, here is an extract from their <a href=https://openai.com/index/triton/>official release note</a>:</p>
+<blockquote>
+<p>We’re releasing Triton 1.0, an open-source Python-like programming language which enables researchers with no CUDA
+experience to write highly efficient GPU code—most of the time on par with what an expert would be able to produce.</p>
+</blockquote>
+<p>The code we write in low-level CUDA and Triton are both compiled to PTX (Parallel Thread eXecution) format, before being executed on the GPU.</p>
+<p>The action plan for today is to:</p>
+<ol>
+<li>Write a simple vector addition program in standard C &mdash; keeping it old school.</li>
+<li>Level up by re-writing the same program in CUDA C to harness the power of parallelism.</li>
+<li>Take it a step further: tweak our CUDA kernel so it can be loaded and executed seamlessly within PyTorch. This is where we make use of PyTorch C++ extension API.</li>
+<li>Finally, swap out the low-level CUDA code for Triton and use it with PyTorch.</li>
+</ol>
+<h2 id=simple-vector-addition-in-standard-c>Simple vector addition in standard C<a hidden class=anchor aria-hidden=true href=#simple-vector-addition-in-standard-c>#</a></h2>
+<p>You might want to brush up your skills on arrays and pointers because we are going to use it a lot moving forward.</p>
+<p>Below is the python equivalent of the C code that we will be writing for vector addition. We define two arrays, iterate through each of their elements, add them and
+append the result to a third array:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>ARRAY_LEN</span> <span class=o>=</span> <span class=mi>5</span>
+
+<span class=k>def</span> <span class=nf>vectAdd</span><span class=p>(</span><span class=n>a</span><span class=p>,</span> <span class=n>b</span><span class=p>,</span> <span class=n>c</span><span class=p>,</span> <span class=n>arr_len</span><span class=p>):</span>
+    <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=nb>range</span><span class=p>(</span><span class=n>arr_len</span><span class=p>):</span>
+        <span class=n>c</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>b</span><span class=p>[</span><span class=n>i</span><span class=p>])</span>
+
+<span class=k>def</span> <span class=nf>main</span><span class=p>():</span>
+    <span class=c1># define two lists/vectors</span>
+    <span class=n>vectA</span> <span class=o>=</span> <span class=p>[</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>]</span>
+    <span class=n>vectB</span> <span class=o>=</span> <span class=p>[</span><span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>5</span><span class=p>]</span>
+    <span class=c1># outputs are appended here</span>
+    <span class=n>vectC</span> <span class=o>=</span> <span class=p>[]</span>
+
+    <span class=c1># loop through each item, add them and append to vectC</span>
+    <span class=n>vectAdd</span><span class=p>(</span><span class=n>vectA</span><span class=p>,</span> <span class=n>vectB</span><span class=p>,</span> <span class=n>vectC</span><span class=p>,</span> <span class=n>ARRAY_LEN</span><span class=p>)</span>
+
+    <span class=c1># print the vector addition result</span>
+    <span class=nb>print</span><span class=p>(</span><span class=n>vectC</span><span class=p>)</span>
+
+
+<span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+    <span class=n>main</span><span class=p>()</span>
+</code></pre></div><p>Here is the equivalent C code for vector addition (save the code in <code>vectAdd.c</code>):</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span><span class=cp></span>
+<span class=cp>#define ARRAY_LEN 5
+</span><span class=cp></span>
+
+<span class=c1>// takes in 3 arrays and the number of elements in the array
+</span><span class=c1></span><span class=kt>void</span> <span class=nf>vectAdd</span><span class=p>(</span><span class=kt>int</span> <span class=o>*</span><span class=n>a</span><span class=p>,</span> <span class=kt>int</span> <span class=o>*</span><span class=n>b</span><span class=p>,</span> <span class=kt>int</span> <span class=o>*</span><span class=n>c</span><span class=p>,</span> <span class=kt>int</span> <span class=n>len</span><span class=p>)</span> <span class=p>{</span>
+    <span class=c1>// loop through each item in `a` and `b`, 
+</span><span class=c1></span>    <span class=c1>// add them and append to `c`
+</span><span class=c1></span>    <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>len</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+        <span class=n>c</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>=</span> <span class=n>a</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>+</span> <span class=n>b</span><span class=p>[</span><span class=n>i</span><span class=p>];</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+    
+    <span class=c1>// define two arrays/vectors of length `ARRAY_LEN`
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>vectA</span><span class=p>[</span><span class=n>ARRAY_LEN</span><span class=p>]</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>};</span>
+    <span class=kt>int</span> <span class=n>vectB</span><span class=p>[</span><span class=n>ARRAY_LEN</span><span class=p>]</span> <span class=o>=</span> <span class=p>{</span><span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>5</span><span class=p>};</span>
+    <span class=c1>// outputs are appended here
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>vectC</span><span class=p>[</span><span class=n>ARRAY_LEN</span><span class=p>];</span>
+
+    <span class=c1>// loop through each item, add them and append to `vectC`
+</span><span class=c1></span>    <span class=n>vectAdd</span><span class=p>(</span><span class=n>vectA</span><span class=p>,</span> <span class=n>vectB</span><span class=p>,</span> <span class=n>vectC</span><span class=p>,</span> <span class=n>ARRAY_LEN</span><span class=p>);</span>
+    
+    <span class=c1>// print the vector addition result
+</span><span class=c1></span>    <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>ARRAY_LEN</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>vectC</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
+    <span class=p>}</span>
+
+    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span> 
+<span class=p>}</span>
+</code></pre></div><p>For those who are wondering, we cannot directly print an array in C as we do in python. So to print the final result of vector addition, we will
+have to iterate through each element in <code>vectC</code>, and print them one after the other.</p>
+<p>You can compile the C code using <a href=https://gcc.gnu.org/><code>gcc</code></a> which comes built-in with most of the linux distros. Just run <code>gcc vecAdd.c -o vecAdd.out</code> which will create an executable
+called <code>vecAdd.out</code>. You can then run <code>./vecAdd.out</code> to get the result of vector addition.</p>
+<h2 id=diving-into-cuda>Diving into CUDA<a hidden class=anchor aria-hidden=true href=#diving-into-cuda>#</a></h2>
+<h3 id=a-quick-refresher-on-cuda-basics>A quick refresher on CUDA basics<a hidden class=anchor aria-hidden=true href=#a-quick-refresher-on-cuda-basics>#</a></h3>
+<p>Now we will take it a step further and parallelize the vector addition program using CUDA. But before that we will do a quick walk through of CUDA basics. If you feel like digging into the details of anything discussed here, you can always checkout the <a href=https://developer.nvidia.com/blog/tag/cuda-refresher/>CUDA refresher series</a> from NVIDIA.</p>
+<p>Since we are dealing with vector addition, consider the example of two vectors <code>A = [1, 2, 3, 4, 5]</code>, <code>B = [4, 5, 3, 3, 5]</code>, and an empty placeholder vector <code>C = []</code> for storing the result of vector addition. Earlier in standard C, we iterated over each element sequentially and added them. But now we have the power of parallelism since we are running our vector addition on a GPU.</p>
+<p>This is how we could parallelize vector addition of <code>A</code> and <code>B</code> using the power of threads in GPU:</p>
+<ol>
+<li>Let&rsquo;s start 5 threads for now since we have 5 items in <code>A</code> and <code>B</code>. Each of these 5 thread will be executed in parallel on the GPU.</li>
+<li>In our program , each thread will only execute one operation, and that is <code>A[i] + B[i]</code> and store it in <code>C[i]</code>.</li>
+<li>For the above step, assume that <code>i</code> is the index of the thread, which will be 0 for the first thread, 1 for the second thread and so on.</li>
+</ol>
+<p>Here&rsquo;s the illustrated version of the above steps:</p>
+<pre tabindex=0><code>Input Vectors:
+   A: [ 1   2   3   4   5 ]
+   B: [ 4   5   3   3   5 ]
+  
+Threads (T0 - T4) execute in parallel:
+
+   T0: C[0] = A[0] + B[0]  →  C[0] =  5
+   T1: C[1] = A[1] + B[1]  →  C[1] =  7
+   T2: C[2] = A[2] + B[2]  →  C[2] =  6
+   T3: C[3] = A[3] + B[3]  →  C[3] =  7
+   T4: C[4] = A[4] + B[4]  →  C[4] =  10
+
+Result stored in output vector:
+   C: [ 5   7  6  7  10 ]
+</code></pre><p>Thus we have a conceptual view of how we could transform a sequential program to a parallel program.</p>
+<p>Here are some technical details that you might want to know:</p>
+<ol>
+<li>
+<p>In a CUDA program, the CPU is called the host and GPU is called the device. To avoid confusions and bugs, variable names defined in the host are prepended with <code>h_</code>
+and variables defined in the device are prepended with <code>d_</code>. For example the variable <code>inpArray</code> defined in host should be <code>h_inpArray</code> and <code>inpArray</code> defined in device should be <code>d_inpArray</code>.</p>
+</li>
+<li>
+<p>The functions with <code>__host__</code> qualifier or without any qualifier are executed on the host and functions with <code>__device__</code> qualifier are executed on the device. The
+functions with <code>__global__</code> qualifier are launched from the host and executed on the device with the specified number of threads. Usually GPU kernels are written with <code>__global__</code> qualifier.</p>
+</li>
+</ol>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=c1>// executed on the CPU
+</span><span class=c1></span><span class=kt>void</span> <span class=nf>randFunc1</span><span class=p>()</span> <span class=p>{</span>
+    <span class=p>...</span>
+<span class=p>}</span>
+
+<span class=c1>// executed on the CPU
+</span><span class=c1></span><span class=n>__host__</span> <span class=kt>void</span> <span class=nf>randFunc2</span><span class=p>()</span> <span class=p>{</span>
+    <span class=p>...</span>
+<span class=p>}</span>
+
+<span class=c1>// executed on the GPU
+</span><span class=c1></span><span class=n>__device__</span> <span class=kt>void</span> <span class=nf>randFunc3</span><span class=p>()</span> <span class=p>{</span>
+    <span class=p>...</span>
+<span class=p>}</span>
+
+<span class=c1>// launched from the CPU  and executed on the GPU
+</span><span class=c1>// This is a GPU kernel
+</span><span class=c1></span><span class=n>__global__</span> <span class=kt>void</span> <span class=nf>randFunc4</span><span class=p>()</span> <span class=p>{</span>
+    <span class=p>...</span>
+<span class=p>}</span>
+</code></pre></div><ol start=3>
+<li>
+<p>This is the workflow of a CUDA program:</p>
+<p>a. We define a kernel with <code>__global__</code> qualifier.</p>
+<p>b. We define the input variables on the host memory.</p>
+<p>c. We transfer the input variables from host to device memory.</p>
+<p>d. We launch the kernel with the specified number of threads, along with the input variables.</p>
+<p>e. We transfer the resulting output variables from device to host memory.</p>
+<p>f. Free the device memory.</p>
+</li>
+</ol>
+<p>Earlier in our illustrated example, we refer to 5 threads with 5 index values. We need these values to perform the addition operation. But how do we get
+this value from inside a kernel? For this, we need to know how grids, blocks and threads are organized in the CUDA programming model. In the most simplest language, multiple
+threads are grouped together to form a block and multiple blocks are grouped together to form a grid.</p>
+<p><img loading=lazy src=/quick_explainers/cuda_triton_beginner/cuda_programming_model.jpg alt="CUDA programming model">
+<em>Figure 1: Organization of blocks and threads in CUDA programming model</em></p>
+<p>In Figure 1, we have 3 blocks along X and Y directions. Each block has 5 threads along X and Y directions. This is the formula to calculate the index for our vector addition example:</p>
+<p>$$
+\text{index} = \text{blockIdx.x} \times \text{blockDim.x} + \text{threadIdx.x}
+$$</p>
+<p>For the thread marked in the figure&mdash; the index of the block is 2 (along X), block dimension is 5 (there are 5 threads in a block) and the thread index is 0. So, index for the kernel can be calculated as:</p>
+<p>$$
+\text{index} = 2 \times 5 + 0 = 10
+$$</p>
+<p>Thus, this thread will compute the sum of 11th element (indexing starts from 0) of <code>A</code> and 11th element of <code>B</code> (we only have 5 elements here though) and store the result as the 11th element of <code>C</code>.</p>
+<h3 id=rolling-up-your-sleeves-writing-cuda-code-for-vector-addition>Rolling up your sleeves: Writing CUDA code for vector addition<a hidden class=anchor aria-hidden=true href=#rolling-up-your-sleeves-writing-cuda-code-for-vector-addition>#</a></h3>
+<p>Now we have the basics of how parallel programs are written. Let&rsquo;s change our standard C code from earlier section to a CUDA kernel.</p>
+<p>We&rsquo;ll re-write the <code>vectAdd</code> function to run only the addition of one element inside it (save it in <code>vectAdd.cu</code>).:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=cp>#include</span> <span class=cpf>&lt;stdio.h&gt;</span><span class=cp>
+</span><span class=cp>#include</span> <span class=cpf>&lt;cuda.h&gt;</span><span class=cp>
+</span><span class=cp></span>
+<span class=c1>// vector addition GPU kernel
+</span><span class=c1></span><span class=n>__global__</span> <span class=kt>void</span> <span class=nf>vectAdd</span><span class=p>(</span><span class=kt>int</span> <span class=o>*</span><span class=n>d_inpA</span><span class=p>,</span> <span class=kt>int</span> <span class=o>*</span><span class=n>d_inpB</span><span class=p>,</span> <span class=kt>int</span> <span class=o>*</span><span class=n>d_outC</span><span class=p>,</span> <span class=kt>int</span> <span class=n>arrLen</span><span class=p>)</span> <span class=p>{</span>
+    <span class=c1>// we use this index to get the element from the array
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>idx</span> <span class=o>=</span> <span class=n>blockIdx</span><span class=p>.</span><span class=n>x</span> <span class=o>*</span> <span class=n>blockDim</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>threadIdx</span><span class=p>.</span><span class=n>x</span><span class=p>;</span>
+
+    <span class=c1>// do computation only if the index is less than the array length
+</span><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=n>idx</span> <span class=o>&lt;</span> <span class=n>arrLen</span><span class=p>){</span>
+        <span class=n>d_outC</span><span class=p>[</span><span class=n>idx</span><span class=p>]</span> <span class=o>=</span> <span class=n>d_inpA</span><span class=p>[</span><span class=n>idx</span><span class=p>]</span> <span class=o>+</span> <span class=n>d_inpB</span><span class=p>[</span><span class=n>idx</span><span class=p>];</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>The <code>cuda.h</code> header file has all the necessary definitions for the CUDA programming model. The <code>__global__</code> qualifier, <code>blockIdx.x</code>, <code>blockDim.x</code> and <code>threadIdx.x</code> are all from this header file.</p>
+<p>Each thread in the GPU will have a copy of the above kernel and will be executed in parallel. Now let&rsquo;s complete our CUDA program by including the <code>main()</code> function from where we will launch the GPU kernel (save it in <code>vectAdd.cu</code> along with the GPU kernel):</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=cp>#define ARRAY_LEN 5
+</span><span class=cp></span>
+<span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+    
+    <span class=c1>// define the no. of blocks and threads 
+</span><span class=c1></span>    <span class=c1>// required for the kernel launch
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>nThreads</span> <span class=o>=</span> <span class=mi>5</span><span class=p>;</span>
+    <span class=kt>int</span> <span class=n>nBlocks</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+
+    <span class=c1>// define the input and output vectors in host
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>h_vectA</span><span class=p>[</span><span class=n>ARRAY_LEN</span><span class=p>]</span> <span class=o>=</span> <span class=p>{</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>};</span>
+    <span class=kt>int</span> <span class=n>h_vectB</span><span class=p>[</span><span class=n>ARRAY_LEN</span><span class=p>]</span> <span class=o>=</span> <span class=p>{</span><span class=mi>4</span><span class=p>,</span> <span class=mi>5</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>5</span><span class=p>};</span>
+    <span class=kt>int</span> <span class=n>h_vectC</span><span class=p>[</span><span class=n>ARRAY_LEN</span><span class=p>];</span>
+    
+    <span class=c1>// pointers to store the memory address of data in device
+</span><span class=c1></span>    <span class=kt>int</span> <span class=o>*</span><span class=n>d_vectA</span><span class=p>;</span>
+    <span class=kt>int</span> <span class=o>*</span><span class=n>d_vectB</span><span class=p>;</span>
+    <span class=kt>int</span> <span class=o>*</span><span class=n>d_vectC</span><span class=p>;</span>
+
+    <span class=c1>// `int` occupies 4 bytes in memory, so `arrSize` will be 20 bytes
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>arrSize</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=kt>int</span><span class=p>)</span> <span class=o>*</span> <span class=n>ARRAY_LEN</span><span class=p>;</span>
+
+    <span class=c1>// allocate the memory in GPU for inputs and outputs
+</span><span class=c1></span>    <span class=n>cudaMalloc</span><span class=p>((</span><span class=kt>void</span><span class=o>**</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>d_vectA</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>);</span>
+    <span class=n>cudaMalloc</span><span class=p>((</span><span class=kt>void</span><span class=o>**</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>d_vectB</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>);</span>
+    <span class=n>cudaMalloc</span><span class=p>((</span><span class=kt>void</span><span class=o>**</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>d_vectC</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>);</span>
+
+    <span class=c1>// copy the data from host to device
+</span><span class=c1></span>    <span class=n>cudaMemcpy</span><span class=p>(</span><span class=n>d_vectA</span><span class=p>,</span> <span class=n>h_vectA</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>,</span> <span class=n>cudaMemcpyHostToDevice</span><span class=p>);</span>
+    <span class=n>cudaMemcpy</span><span class=p>(</span><span class=n>d_vectB</span><span class=p>,</span> <span class=n>h_vectB</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>,</span> <span class=n>cudaMemcpyHostToDevice</span><span class=p>);</span>
+
+    <span class=c1>// launch the kernel
+</span><span class=c1></span>    <span class=n>vectAdd</span> <span class=o>&lt;&lt;&lt;</span><span class=n>nBlocks</span><span class=p>,</span> <span class=n>nThreads</span><span class=o>&gt;&gt;&gt;</span><span class=p>(</span><span class=n>d_vectA</span><span class=p>,</span> <span class=n>d_vectB</span><span class=p>,</span> <span class=n>d_vectC</span><span class=p>,</span> <span class=n>ARRAY_LEN</span><span class=p>);</span>
+
+    <span class=c1>// copy the output data from device to host
+</span><span class=c1></span>    <span class=n>cudaMemcpy</span><span class=p>(</span><span class=n>h_vectC</span><span class=p>,</span> <span class=n>d_vectC</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>,</span> <span class=n>cudaMemcpyDeviceToHost</span><span class=p>);</span>
+
+    <span class=c1>// free the memory allocated in device
+</span><span class=c1></span>    <span class=n>cudaFree</span><span class=p>(</span><span class=n>d_vectA</span><span class=p>);</span>
+    <span class=n>cudaFree</span><span class=p>(</span><span class=n>d_vectB</span><span class=p>);</span>
+    <span class=n>cudaFree</span><span class=p>(</span><span class=n>d_vectC</span><span class=p>);</span>
+
+    <span class=c1>// print the vector addition result
+</span><span class=c1></span>    <span class=k>for</span><span class=p>(</span><span class=kt>int</span> <span class=n>i</span><span class=o>=</span><span class=mi>0</span><span class=p>;</span> <span class=n>i</span><span class=o>&lt;</span><span class=n>ARRAY_LEN</span><span class=p>;</span> <span class=n>i</span><span class=o>++</span><span class=p>)</span> <span class=p>{</span>
+        <span class=n>printf</span><span class=p>(</span><span class=s>&#34;%d</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>h_vectC</span><span class=p>[</span><span class=n>i</span><span class=p>]);</span>
+    <span class=p>}</span>
+
+    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=p>}</span>
+</code></pre></div><p>The CUDA code above can be compiled and executed using <a href=https://en.wikipedia.org/wiki/Nvidia_CUDA_Compiler>NVCC (Nvidia CUDA Compiler)</a> using the command <code>nvcc vectAdd.cu -o vectAdd.out && ./vectAdd.out</code>.</p>
+<p>Here are some extra notes that might explain the GPU code better:</p>
+<ol>
+<li>We define three pointers, <code>d_vectA</code>, <code>d_vectB</code> and <code>d_vectC</code>. If we print these pointers before calling <code>cudaMalloc</code>, the values will be <code>(nil)</code>. After running <code>cudaMalloc((void**) &d_vectA, arrSize)</code>, the value of <code>d_vectA</code> will be a memory address. Under the hood <code>cudaMalloc</code> allocated memory in the GPU of size <code>arrSize</code> and assigned this address as the value of <code>d_vectA</code>. Let&rsquo;s confirm this by printing out stuff from the original main function:</li>
+</ol>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=kt>int</span> <span class=nf>main</span><span class=p>()</span> <span class=p>{</span>
+    <span class=p>...</span>
+    
+    <span class=c1>// `int` occupies 4 bytes in memory, so `arrSize` will be 20 bytes in memory
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>arrSize</span> <span class=o>=</span> <span class=k>sizeof</span><span class=p>(</span><span class=kt>int</span><span class=p>)</span> <span class=o>*</span> <span class=n>ARRAY_LEN</span><span class=p>;</span>
+
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Before memory allocation:</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Address stored in `d_vectA`: %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>d_vectA</span><span class=p>);</span>
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Address stored in `d_vectB`: %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>d_vectB</span><span class=p>);</span>
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Address stored in `d_vectC`: %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>d_vectC</span><span class=p>);</span>
+
+    <span class=c1>// allocate the memory in GPU for inputs and outputs
+</span><span class=c1></span>    <span class=n>cudaMalloc</span><span class=p>((</span><span class=kt>void</span><span class=o>**</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>d_vectA</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>);</span>
+    <span class=n>cudaMalloc</span><span class=p>((</span><span class=kt>void</span><span class=o>**</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>d_vectB</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>);</span>
+    <span class=n>cudaMalloc</span><span class=p>((</span><span class=kt>void</span><span class=o>**</span><span class=p>)</span> <span class=o>&amp;</span><span class=n>d_vectC</span><span class=p>,</span> <span class=n>arrSize</span><span class=p>);</span>
+
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;After memory allocation:</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>);</span>
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Address stored in `d_vectA`: %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>d_vectA</span><span class=p>);</span>
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Address stored in `d_vectB`: %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>d_vectB</span><span class=p>);</span>
+    <span class=n>printf</span><span class=p>(</span><span class=s>&#34;Address stored in `d_vectC`: %p</span><span class=se>\n</span><span class=s>&#34;</span><span class=p>,</span> <span class=n>d_vectC</span><span class=p>);</span>
+
+    <span class=p>...</span>
+    <span class=k>return</span> <span class=mi>0</span><span class=p>;</span>
+<span class=p>}</span>
+
+<span class=c1>///////////////////// OUTPUT /////////////////////
+</span><span class=c1></span>
+<span class=cm>/*
+</span><span class=cm>    This is a sample output from running the 
+</span><span class=cm>    above print statements (the exact memory address may vary):
+</span><span class=cm>
+</span><span class=cm>    Before memory allocation:
+</span><span class=cm>    Address stored in the pointer `d_vectA`: (nil)
+</span><span class=cm>    Address stored in the pointer `d_vectB`: (nil)
+</span><span class=cm>    Address stored in the pointer `d_vectC`: (nil)
+</span><span class=cm>
+</span><span class=cm>    After memory allocation:
+</span><span class=cm>    Address stored in the pointer `d_vectA`: 0x502c00000
+</span><span class=cm>    Address stored in the pointer `d_vectB`: 0x502c00200
+</span><span class=cm>    Address stored in the pointer `d_vectC`: 0x502c00400
+</span><span class=cm>*/</span>
+</code></pre></div><ol start=2>
+<li>
+<p><code>cudaMemcpy</code> with <code>cudaMemcpyHostToDevice</code> as argument copies the data from host to device, whereas <code>cudaMemcpy</code> with <code>cudaMemcpyDeviceToHost</code> as argument copies the data from device to host.</p>
+</li>
+<li>
+<p>Launching a GPU kernel is as simple as calling <code>kernelName &lt;&lt;&lt;nBlocks, nThreads>>> (args);</code>. In our case, it is <code>vectAdd &lt;&lt;&lt;nBlocks, nThreads>>> (d_vectA, d_vectB, d_vectC, ARRAY_LEN);</code></p>
+</li>
+<li>
+<p>After the kernel execution is over and the results are copied from device to host, we call <code>cudaFree</code> to free the device memory allocated for <code>d_vectA</code>, <code>d_vectB</code> and <code>d_vectC</code>.</p>
+</li>
+</ol>
+<h3 id=using-pytorch-c-extension-api-to-load-cuda-kernels>Using PyTorch C++ extension API to load CUDA kernels<a hidden class=anchor aria-hidden=true href=#using-pytorch-c-extension-api-to-load-cuda-kernels>#</a></h3>
+<p>I used Google Colab for this part to skip messing up with dependency installation issues. If you are on Google Colab with GPU, run <code>sudo apt install ninja-build</code> and restart the session before running any code.</p>
+<p>We are going to use <a href=https://pytorch.org/docs/stable/cpp_extension.html#torch.utils.cpp_extension.load_inline><code>torch.utils.cpp_extension.load_inline</code></a> to load the CUDA kernel from PyTorch python API.</p>
+<p>On a high level, this is how are going to load the cuda kernel with PyTorch:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>torch</span>
+<span class=kn>from</span> <span class=nn>torch.utils.cpp_extension</span> <span class=kn>import</span> <span class=n>load_inline</span>
+
+<span class=n>cuda_src</span> <span class=o>=</span> <span class=c1># some cuda code</span>
+<span class=n>cpp_src</span> <span class=o>=</span> <span class=c1># some c++ code</span>
+
+<span class=c1># load the low-level CUDA and C++ code</span>
+<span class=n>module</span> <span class=o>=</span> <span class=n>load_inline</span><span class=p>(</span>
+    <span class=n>name</span><span class=o>=</span><span class=s2>&#34;vectAdd&#34;</span><span class=p>,</span>
+    <span class=n>cuda_sources</span><span class=o>=</span><span class=p>[</span><span class=n>cuda_src</span><span class=p>],</span>
+    <span class=n>cpp_sources</span><span class=o>=</span><span class=p>[</span><span class=n>cpp_src</span><span class=p>],</span>
+    <span class=n>functions</span><span class=o>=</span><span class=p>[</span><span class=s2>&#34;vect_add&#34;</span><span class=p>],</span>
+    <span class=n>with_cuda</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span>
+    <span class=c1># nvcc compiler flag for optimization level</span>
+    <span class=n>extra_cuda_cflags</span><span class=o>=</span><span class=p>[</span><span class=s2>&#34;-O2&#34;</span><span class=p>],</span>
+<span class=p>)</span>
+
+<span class=c1># input tensors for vector addition</span>
+<span class=n>x</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=n>dtype</span><span class=o>=</span><span class=n>torch</span><span class=o>.</span><span class=n>int</span><span class=p>,</span> <span class=n>device</span><span class=o>=</span><span class=s2>&#34;cuda&#34;</span><span class=p>)</span>
+<span class=n>y</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>6</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=n>dtype</span><span class=o>=</span><span class=n>torch</span><span class=o>.</span><span class=n>int</span><span class=p>,</span> <span class=n>device</span><span class=o>=</span><span class=s2>&#34;cuda&#34;</span><span class=p>)</span>
+
+<span class=c1># call the vector addition function</span>
+<span class=n>res</span> <span class=o>=</span> <span class=n>module</span><span class=o>.</span><span class=n>vect_add</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>res</span><span class=p>)</span>
+
+<span class=c1>## Output: tensor([2, 4, 9, 8], device=&#39;cuda:0&#39;, dtype=torch.int32)</span>
+</code></pre></div><p>The only part left to fill in are the <code>cuda_src</code> and <code>cpp_src</code>. Let&rsquo;s do that now.</p>
+<p>This is the <code>cpp_src</code> for us:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>cpp_src</span> <span class=o>=</span> <span class=s2>&#34;torch::Tensor vect_add(torch::Tensor x, torch::Tensor y);&#34;</span>
+</code></pre></div><p>We declare the C++ function <code>vect_add</code> that takes in two tensors as input. Think of it as the template for the function that we are going to define inside <code>cuda_src</code>. The API for torch in C++ is almost similar to python, mostly the dot notations like <code>torch.Tensor</code> are replaced with <code>torch::Tensor</code>. We will see more of this when we define our function in <code>cuda_src</code> below.</p>
+<p>We will save the code for <code>cuda_src</code> in the file <code>vectAddTorch.cu</code> and then use pathlib&rsquo;s <code>read_text()</code> function to read it as a string.</p>
+<p>This is the <code>cuda_src</code> for us (save this in <code>vectAddTorch.cu</code>):</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-C data-lang=C><span class=c1>// GPU kernel
+</span><span class=c1></span><span class=n>__global__</span> <span class=kt>void</span> <span class=nf>vectAddKernel</span><span class=p>(</span><span class=kt>int</span> <span class=o>*</span><span class=n>a</span><span class=p>,</span> <span class=kt>int</span> <span class=o>*</span><span class=n>b</span><span class=p>,</span> <span class=kt>int</span> <span class=o>*</span><span class=n>c</span><span class=p>,</span> <span class=kt>int</span> <span class=n>len</span><span class=p>)</span> <span class=p>{</span>
+    <span class=kt>int</span> <span class=n>idx</span> <span class=o>=</span> <span class=n>blockIdx</span><span class=p>.</span><span class=n>x</span> <span class=o>*</span> <span class=n>blockDim</span><span class=p>.</span><span class=n>x</span> <span class=o>+</span> <span class=n>threadIdx</span><span class=p>.</span><span class=n>x</span><span class=p>;</span>
+
+    <span class=k>if</span> <span class=p>(</span><span class=n>idx</span> <span class=o>&lt;</span> <span class=n>len</span><span class=p>)</span> <span class=p>{</span>
+        <span class=n>c</span><span class=p>[</span><span class=n>idx</span><span class=p>]</span> <span class=o>=</span> <span class=n>a</span><span class=p>[</span><span class=n>idx</span><span class=p>]</span> <span class=o>+</span> <span class=n>b</span><span class=p>[</span><span class=n>idx</span><span class=p>];</span>
+    <span class=p>}</span>
+<span class=p>}</span>
+
+<span class=c1>// define the C++ function declared in `cpp_src`
+</span><span class=c1></span><span class=n>torch</span><span class=o>::</span><span class=n>Tensor</span> <span class=n>vect_add</span><span class=p>(</span><span class=n>torch</span><span class=o>::</span><span class=n>Tensor</span> <span class=n>x</span><span class=p>,</span> <span class=n>torch</span><span class=o>::</span><span class=n>Tensor</span> <span class=n>y</span><span class=p>)</span> <span class=p>{</span>
+    <span class=c1>// get the number of elements in the tensor
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>size</span> <span class=o>=</span> <span class=n>x</span><span class=p>.</span><span class=n>numel</span><span class=p>();</span>
+
+    <span class=c1>// no. of threads &amp; blocks for launching the kernel 
+</span><span class=c1></span>    <span class=kt>int</span> <span class=n>n_threads</span> <span class=o>=</span> <span class=mi>5</span><span class=p>;</span>
+    <span class=kt>int</span> <span class=n>n_blocks</span> <span class=o>=</span> <span class=mi>1</span><span class=p>;</span>
+
+    <span class=c1>// create an empty tensor to store the results of
+</span><span class=c1></span>    <span class=c1>// vector addition
+</span><span class=c1></span>    <span class=n>torch</span><span class=o>::</span><span class=n>Tensor</span> <span class=n>out</span> <span class=o>=</span> <span class=n>torch</span><span class=o>::</span><span class=n>empty_like</span><span class=p>(</span><span class=n>x</span><span class=p>);</span>
+
+    <span class=c1>// launch the vector addition kernel
+</span><span class=c1></span>    <span class=c1>// pass the pointer to `x`, `y` and `out` along with the size
+</span><span class=c1></span>    <span class=n>vectAddKernel</span> <span class=o>&lt;&lt;&lt;</span><span class=n>n_blocks</span><span class=p>,</span> <span class=n>n_threads</span><span class=o>&gt;&gt;&gt;</span> <span class=p>(</span><span class=n>x</span><span class=p>.</span><span class=n>data_ptr</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(),</span> <span class=n>y</span><span class=p>.</span><span class=n>data_ptr</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(),</span> <span class=n>out</span><span class=p>.</span><span class=n>data_ptr</span><span class=o>&lt;</span><span class=kt>int</span><span class=o>&gt;</span><span class=p>(),</span> <span class=n>size</span><span class=p>);</span>
+
+    <span class=c1>// return the result
+</span><span class=c1></span>    <span class=k>return</span> <span class=n>out</span><span class=p>;</span>
+<span class=p>}</span>
+</code></pre></div><p>So instead of the <code>main()</code> function from the previous iteration, we now use the power of PyTorch&rsquo;s C++ API to define a function <code>vect_add</code> that takes in pytorch tensors and launches the vector addition GPU kernel and returns the result as a PyTorch tensor.</p>
+<p>Let&rsquo;s now complete our python code to load the CUDA kernel (save this in <code>vectAddTorch.py</code>):</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>pathlib</span> <span class=kn>import</span> <span class=n>Path</span>
+
+<span class=kn>import</span> <span class=nn>torch</span>
+<span class=kn>from</span> <span class=nn>torch.utils.cpp_extension</span> <span class=kn>import</span> <span class=n>load_inline</span>
+
+<span class=c1># added the `cuda_src` and `cpp_src`</span>
+<span class=n>cuda_src</span> <span class=o>=</span> <span class=n>Path</span><span class=p>(</span><span class=s2>&#34;vectAddTorch.cu&#34;</span><span class=p>)</span><span class=o>.</span><span class=n>read_text</span><span class=p>()</span>
+<span class=n>cpp_src</span> <span class=o>=</span> <span class=s2>&#34;torch::Tensor vect_add(torch::Tensor x, torch::Tensor y);&#34;</span>
+
+<span class=c1># load the low-level CUDA and C++ code</span>
+<span class=n>module</span> <span class=o>=</span> <span class=n>load_inline</span><span class=p>(</span>
+    <span class=n>name</span><span class=o>=</span><span class=s2>&#34;vectAdd&#34;</span><span class=p>,</span>
+    <span class=n>cuda_sources</span><span class=o>=</span><span class=p>[</span><span class=n>cuda_src</span><span class=p>],</span>
+    <span class=n>cpp_sources</span><span class=o>=</span><span class=p>[</span><span class=n>cpp_src</span><span class=p>],</span>
+    <span class=n>functions</span><span class=o>=</span><span class=p>[</span><span class=s2>&#34;vect_add&#34;</span><span class=p>],</span>
+    <span class=n>with_cuda</span><span class=o>=</span><span class=kc>True</span><span class=p>,</span>
+    <span class=c1># nvcc compiler flag for optimization level</span>
+    <span class=n>extra_cuda_cflags</span><span class=o>=</span><span class=p>[</span><span class=s2>&#34;-O2&#34;</span><span class=p>],</span>
+<span class=p>)</span>
+
+<span class=c1># input tensors for vector addition</span>
+<span class=n>x</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=n>dtype</span><span class=o>=</span><span class=n>torch</span><span class=o>.</span><span class=n>int</span><span class=p>,</span> <span class=n>device</span><span class=o>=</span><span class=s2>&#34;cuda&#34;</span><span class=p>)</span>
+<span class=n>y</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>6</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=n>dtype</span><span class=o>=</span><span class=n>torch</span><span class=o>.</span><span class=n>int</span><span class=p>,</span> <span class=n>device</span><span class=o>=</span><span class=s2>&#34;cuda&#34;</span><span class=p>)</span>
+
+<span class=c1># vector addition function</span>
+<span class=n>res</span> <span class=o>=</span> <span class=n>module</span><span class=o>.</span><span class=n>vect_add</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>res</span><span class=p>)</span>
+
+<span class=c1>## Output: tensor([2, 4, 9, 8], device=&#39;cuda:0&#39;, dtype=torch.int32)</span>
+</code></pre></div><h2 id=replacing-low-level-cuda-code-with-triton>Replacing low-level CUDA code with Triton<a hidden class=anchor aria-hidden=true href=#replacing-low-level-cuda-code-with-triton>#</a></h2>
+<p>This part will be a lot more easier since we already know the CUDA programming model. We will define a triton
+kernel using a python like syntax and use it directly from PyTorch without us having to bother about the low-level CUDA code.</p>
+<p>Every triton kernel is decorated with <code>triton.jit</code> decorator. This compiles the function just-in-time using the triton compiler. But we
+don&rsquo;t have to worry about this for now, we just decorate our kernel with <code>triton.jit</code> and the rest is handled by triton.</p>
+<p>Triton abstracts away the concept of threads, thus, triton functions are executed on a block of data rather than on a single element. Here is an illustration
+of how triton works when we launch a vector addition kernel with only two blocks:</p>
+<pre tabindex=0><code>Input Vectors:
+   A: [ 1   2   3   4 ]
+   B: [ 4   5   3   3 ]
+
+Blocks (B1 - B2) execute in parallel:
+
+   B1: C[0: 2] = A[0: 2] + B[0: 2]  →  C[0: 2] =  [ 5   7 ]
+   B2: C[2: 4] = A[2: 4] + B[2: 4]  →  C[2: 4] =  [ 6   7 ]
+
+Result stored in output vector:
+   C: [ 5   7  6  7 ]
+</code></pre><p>Let&rsquo;s assume that we would like to do a vector addition of two tensors with 4 elements each. The triton kernel
+can be written as follows (save it in <code>vectAddTriton.py</code>):</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>os</span>
+<span class=kn>import</span> <span class=nn>triton</span>
+<span class=kn>import</span> <span class=nn>triton.language</span> <span class=k>as</span> <span class=nn>tl</span>
+
+<span class=c1># env variable for debugging triton</span>
+<span class=n>os</span><span class=o>.</span><span class=n>environ</span><span class=p>[</span><span class=s2>&#34;TRITON_INTERPRET&#34;</span><span class=p>]</span> <span class=o>=</span> <span class=s2>&#34;1&#34;</span>
+
+<span class=c1># triton kernel for vector addition</span>
+<span class=nd>@triton</span><span class=o>.</span><span class=n>jit</span>
+<span class=k>def</span> <span class=nf>vect_add_kernel</span><span class=p>(</span>
+    <span class=n>x_ptr</span><span class=p>,</span> 
+    <span class=n>y_ptr</span><span class=p>,</span> 
+    <span class=n>out_ptr</span><span class=p>,</span>
+    <span class=n>BLOCK_SIZE</span><span class=p>:</span> <span class=n>tl</span><span class=o>.</span><span class=n>constexpr</span><span class=p>,</span> 
+    <span class=n>num_elements</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span>
+<span class=p>):</span>
+    <span class=c1># get the program id, similar to `idx` in CUDA kernel</span>
+    <span class=n>pid</span> <span class=o>=</span> <span class=n>tl</span><span class=o>.</span><span class=n>program_id</span><span class=p>(</span><span class=n>axis</span><span class=o>=</span><span class=mi>0</span><span class=p>)</span>
+
+    <span class=c1># get the start and end of the block</span>
+    <span class=n>block_start</span> <span class=o>=</span> <span class=n>pid</span> <span class=o>*</span> <span class=n>BLOCK_SIZE</span>
+    <span class=n>offset</span> <span class=o>=</span> <span class=n>block_start</span> <span class=o>+</span> <span class=n>tl</span><span class=o>.</span><span class=n>arange</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=n>BLOCK_SIZE</span><span class=p>)</span>
+    <span class=c1># we don&#39;t do any computation on indices where mask is false</span>
+    <span class=n>mask</span> <span class=o>=</span> <span class=n>offset</span> <span class=o>&lt;</span> <span class=n>num_elements</span>
+
+    <span class=c1># load the input tensors as a block</span>
+    <span class=n>x</span> <span class=o>=</span> <span class=n>tl</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>x_ptr</span> <span class=o>+</span> <span class=n>offset</span><span class=p>,</span> <span class=n>mask</span><span class=o>=</span><span class=n>mask</span><span class=p>)</span>
+    <span class=n>y</span> <span class=o>=</span> <span class=n>tl</span><span class=o>.</span><span class=n>load</span><span class=p>(</span><span class=n>y_ptr</span> <span class=o>+</span> <span class=n>offset</span><span class=p>,</span> <span class=n>mask</span><span class=o>=</span><span class=n>mask</span><span class=p>)</span>
+    <span class=nb>print</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+
+    <span class=c1># vector addition on the loaded block of data</span>
+    <span class=n>output</span> <span class=o>=</span> <span class=n>x</span> <span class=o>+</span> <span class=n>y</span>
+    <span class=c1># store the output</span>
+    <span class=n>tl</span><span class=o>.</span><span class=n>store</span><span class=p>(</span><span class=n>out_ptr</span> <span class=o>+</span> <span class=n>offset</span><span class=p>,</span> <span class=n>output</span><span class=p>,</span> <span class=n>mask</span><span class=o>=</span><span class=n>mask</span><span class=p>)</span>
+</code></pre></div><p>If we were to launch the above kernel with two vectors <code>x = [1, 2, 3, 4]</code> and <code>y = [5, 6, 7, 8]</code>, <code>BLOCK_SIZE=2</code> and the number of blocks as 3.
+Each of the 3 blocks will get 2 elements to run the vector addition. If we print the <code>pid</code>, <code>block_start</code>, <code>offset</code>, <code>mask</code> and data blocks while running the kernel,
+it will be as follows:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1>### BLOCK_SIZE = 2</span>
+<span class=c1>### NUM_BLOCKS = 3</span>
+<span class=c1>### x = [1, 2, 3, 4]</span>
+<span class=c1>### y = [5, 6, 7, 8]</span>
+
+<span class=n>PID</span><span class=p>:</span> <span class=p>[</span><span class=mi>0</span><span class=p>]</span>
+<span class=n>Block</span> <span class=n>start</span><span class=p>:</span> <span class=p>[</span><span class=mi>0</span><span class=p>]</span>          <span class=c1># pid * BLOCK_SIZE</span>
+<span class=n>Offset</span><span class=p>:</span> <span class=p>[</span><span class=mi>0</span> <span class=mi>1</span><span class=p>]</span>             <span class=c1># block_start + tl.arange(0, BLOCK_SIZE)</span>
+<span class=n>Mask</span><span class=p>:</span> <span class=p>[</span> <span class=kc>True</span>  <span class=kc>True</span><span class=p>]</span>       <span class=c1># offset &lt; num_elements</span>
+<span class=n>Data</span> <span class=n>block</span> <span class=kn>from</span> <span class=nn>x</span><span class=p>:</span> <span class=p>[</span><span class=mi>1</span> <span class=mi>2</span><span class=p>]</span>
+<span class=n>Data</span> <span class=n>block</span> <span class=kn>from</span> <span class=nn>y</span><span class=p>:</span> <span class=p>[</span><span class=mi>5</span> <span class=mi>6</span><span class=p>]</span>
+<span class=n>Output</span> <span class=n>block</span><span class=p>:</span> <span class=p>[</span><span class=mi>6</span> <span class=mi>8</span><span class=p>]</span>
+
+<span class=n>PID</span><span class=p>:</span> <span class=p>[</span><span class=mi>1</span><span class=p>]</span>
+<span class=n>Block</span> <span class=n>start</span><span class=p>:</span> <span class=p>[</span><span class=mi>2</span><span class=p>]</span>
+<span class=n>Offset</span><span class=p>:</span> <span class=p>[</span><span class=mi>2</span> <span class=mi>3</span><span class=p>]</span>
+<span class=n>Mask</span><span class=p>:</span> <span class=p>[</span> <span class=kc>True</span>  <span class=kc>True</span><span class=p>]</span>
+<span class=n>Data</span> <span class=n>block</span> <span class=kn>from</span> <span class=nn>x</span><span class=p>:</span> <span class=p>[</span><span class=mi>3</span> <span class=mi>4</span><span class=p>]</span>
+<span class=n>Data</span> <span class=n>block</span> <span class=kn>from</span> <span class=nn>y</span><span class=p>:</span> <span class=p>[</span><span class=mi>7</span> <span class=mi>8</span><span class=p>]</span>
+<span class=n>Output</span> <span class=n>block</span><span class=p>:</span> <span class=p>[</span><span class=mi>10</span> <span class=mi>12</span><span class=p>]</span>
+
+<span class=n>PID</span><span class=p>:</span> <span class=p>[</span><span class=mi>2</span><span class=p>]</span>
+<span class=n>Block</span> <span class=n>start</span><span class=p>:</span> <span class=p>[</span><span class=mi>4</span><span class=p>]</span>
+<span class=n>Offset</span><span class=p>:</span> <span class=p>[</span><span class=mi>4</span> <span class=mi>5</span><span class=p>]</span>
+<span class=n>Mask</span><span class=p>:</span> <span class=p>[</span><span class=kc>False</span> <span class=kc>False</span><span class=p>]</span>
+<span class=n>Data</span> <span class=n>block</span> <span class=kn>from</span> <span class=nn>x</span><span class=p>:</span> <span class=p>[</span><span class=mi>0</span> <span class=mi>0</span><span class=p>]</span>
+<span class=n>Data</span> <span class=n>block</span> <span class=kn>from</span> <span class=nn>y</span><span class=p>:</span> <span class=p>[</span><span class=mi>0</span> <span class=mi>0</span><span class=p>]</span>
+<span class=n>Output</span> <span class=n>block</span><span class=p>:</span> <span class=p>[</span><span class=mi>0</span> <span class=mi>0</span><span class=p>]</span>
+</code></pre></div><p>Finally, let&rsquo;s add in the function that passes the input tensors and launch the kernel
+(save it in <code>vectAddTriton.py</code>):</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>torch</span>
+
+<span class=n>DEVICE</span> <span class=o>=</span> <span class=s2>&#34;cuda:0&#34;</span>
+<span class=n>BLOCK_SIZE</span> <span class=o>=</span> <span class=mi>2</span>
+
+<span class=k>def</span> <span class=nf>add</span><span class=p>(</span><span class=n>x</span><span class=p>:</span> <span class=n>torch</span><span class=o>.</span><span class=n>Tensor</span><span class=p>,</span> <span class=n>y</span><span class=p>:</span> <span class=n>torch</span><span class=o>.</span><span class=n>Tensor</span><span class=p>):</span>
+    <span class=k>assert</span> <span class=n>x</span><span class=o>.</span><span class=n>device</span> <span class=o>==</span> <span class=n>y</span><span class=o>.</span><span class=n>device</span> <span class=o>==</span> <span class=n>torch</span><span class=o>.</span><span class=n>device</span><span class=p>(</span><span class=n>DEVICE</span><span class=p>)</span>
+
+    <span class=c1># output of vector addition is stored here</span>
+    <span class=n>output</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>empty_like</span><span class=p>(</span><span class=n>x</span><span class=p>)</span>
+    <span class=c1># launch the kernel with 3 blocks along X axis </span>
+    <span class=c1># (only along X axis because we are dealing with 1D tensor here)</span>
+    <span class=n>vect_add_kernel</span><span class=p>[(</span><span class=mi>3</span><span class=p>,)](</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>,</span> <span class=n>output</span><span class=p>,</span> <span class=n>BLOCK_SIZE</span><span class=p>,</span> <span class=n>num_elements</span><span class=o>=</span><span class=n>x</span><span class=o>.</span><span class=n>numel</span><span class=p>())</span>
+    
+    <span class=k>return</span> <span class=n>output</span>
+
+<span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+
+    <span class=n>x</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>([</span><span class=mi>1</span><span class=p>,</span> <span class=mi>2</span><span class=p>,</span> <span class=mi>3</span><span class=p>,</span> <span class=mi>4</span><span class=p>],</span> <span class=n>device</span><span class=o>=</span><span class=n>DEVICE</span><span class=p>)</span>
+    <span class=n>y</span> <span class=o>=</span> <span class=n>torch</span><span class=o>.</span><span class=n>tensor</span><span class=p>([</span><span class=mi>5</span><span class=p>,</span> <span class=mi>6</span><span class=p>,</span> <span class=mi>7</span><span class=p>,</span> <span class=mi>8</span><span class=p>],</span> <span class=n>device</span><span class=o>=</span><span class=n>DEVICE</span><span class=p>)</span>
+
+    <span class=n>res</span> <span class=o>=</span> <span class=n>add</span><span class=p>(</span><span class=n>x</span><span class=p>,</span> <span class=n>y</span><span class=p>)</span>
+    <span class=nb>print</span><span class=p>(</span><span class=n>res</span><span class=p>)</span>
+
+<span class=c1>## Output: tensor([ 6,  8, 10, 12], device=&#39;cuda:0&#39;)</span>
+</code></pre></div><p>We can run the the above code including the triton kernel as a normal python script. Setting the environment variable
+<code>"TRITON_INTERPRET"</code> allows us to print stuff and set breakpoints while running the triton kernel. You can read more about debugging triton kernels <a href=https://triton-lang.org/main/programming-guide/chapter-3/debugging.html>here</a>.</p>
+<p>We finally made it to the end of this post after going through a whole lot of C, CUDA, C++ and Triton. This was just a glimpse of the huge GPU programming landscape. I&rsquo;ve deliberately left the kernel profiling and benchmarking
+steps, this can be considered as a potential next step for the readers.</p>
+<p>All the code used in this post can found <a href=https://github.com/bipinKrishnan/ml_engineering/tree/main/cuda_beginner>here</a>.</p>
+<h2 id=useful-resources>Useful resources<a hidden class=anchor aria-hidden=true href=#useful-resources>#</a></h2>
+<p>[1] <a href=https://github.com/gpu-mode/lectures>“Gpu-Mode/Lectures: Material for Gpu-Mode Lectures”</a>. GitHub. 2025.</p>
+<p>[2] <a href=https://triton-lang.org/main/getting-started/tutorials/01-vector-add.html>“Vector Addition — Triton Documentation”</a>. Triton-Lang.org. 2020.</p>
+</div>
+<footer class=post-footer>
+<ul class=post-tags>
+<li><a href=https://bipinkrishnan.github.io/tags/quick-explainer/>Quick Explainers</a></li>
+<li><a href=https://bipinkrishnan.github.io/tags/cuda/>cuda</a></li>
+<li><a href=https://bipinkrishnan.github.io/tags/openai-triton/>openai-triton</a></li>
+</ul>
+<nav class=paginav>
+<a class=next href=https://bipinkrishnan.github.io/posts/quick-explainer-activation-checkpointing/>
+<span class=title>Next »</span>
+<br>
+<span>Quick Explainer: Activation Checkpointing</span>
+</a>
+</nav>
+<div class=share-buttons>
+<a target=_blank rel="noopener noreferrer" aria-label="share Quick Explainer: GPU Programming with CUDA and Triton on twitter" href="https://twitter.com/intent/tweet/?text=Quick%20Explainer%3a%20GPU%20Programming%20with%20CUDA%20and%20Triton&url=https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f&hashtags=quick-explainer%2ccuda%2copenai-triton"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM195.519 424.544c135.939.0 210.268-112.643 210.268-210.268.0-3.218.0-6.437-.153-9.502 14.406-10.421 26.973-23.448 36.935-38.314-13.18 5.824-27.433 9.809-42.452 11.648 15.326-9.196 26.973-23.602 32.49-40.92-14.252 8.429-30.038 14.56-46.896 17.931-13.487-14.406-32.644-23.295-53.946-23.295-40.767.0-73.87 33.104-73.87 73.87.0 5.824.613 11.494 1.992 16.858-61.456-3.065-115.862-32.49-152.337-77.241-6.284 10.881-9.962 23.601-9.962 37.088.0 25.594 13.027 48.276 32.95 61.456-12.107-.307-23.448-3.678-33.41-9.196v.92c0 35.862 25.441 65.594 59.311 72.49-6.13 1.686-12.72 2.606-19.464 2.606-4.751.0-9.348-.46-13.946-1.38 9.349 29.426 36.628 50.728 68.965 51.341-25.287 19.771-57.164 31.571-91.8 31.571-5.977.0-11.801-.306-17.625-1.073 32.337 21.15 71.264 33.41 112.95 33.41z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Quick Explainer: GPU Programming with CUDA and Triton on linkedin" href="https://www.linkedin.com/shareArticle?mini=true&url=https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f&title=Quick%20Explainer%3a%20GPU%20Programming%20with%20CUDA%20and%20Triton&summary=Quick%20Explainer%3a%20GPU%20Programming%20with%20CUDA%20and%20Triton&source=https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM160.461 423.278V197.561h-75.04v225.717h75.04zm270.539.0V293.839c0-69.333-37.018-101.586-86.381-101.586-39.804.0-57.634 21.891-67.617 37.266v-31.958h-75.021c.995 21.181.0 225.717.0 225.717h75.02V297.222c0-6.748.486-13.492 2.474-18.315 5.414-13.475 17.767-27.434 38.494-27.434 27.135.0 38.007 20.707 38.007 51.037v120.768H431zM123.448 88.722C97.774 88.722 81 105.601 81 127.724c0 21.658 16.264 39.002 41.455 39.002h.484c26.165.0 42.452-17.344 42.452-39.002-.485-22.092-16.241-38.954-41.943-39.002z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Quick Explainer: GPU Programming with CUDA and Triton on reddit" href="https://reddit.com/submit?url=https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f&title=Quick%20Explainer%3a%20GPU%20Programming%20with%20CUDA%20and%20Triton"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zM446 265.638c0-22.964-18.616-41.58-41.58-41.58-11.211.0-21.361 4.457-28.841 11.666-28.424-20.508-67.586-33.757-111.204-35.278l18.941-89.121 61.884 13.157c.756 15.734 13.642 28.29 29.56 28.29 16.407.0 29.706-13.299 29.706-29.701.0-16.403-13.299-29.702-29.706-29.702-11.666.0-21.657 6.792-26.515 16.578l-69.105-14.69c-1.922-.418-3.939-.042-5.585 1.036-1.658 1.073-2.811 2.761-3.224 4.686l-21.152 99.438c-44.258 1.228-84.046 14.494-112.837 35.232-7.468-7.164-17.589-11.591-28.757-11.591-22.965.0-41.585 18.616-41.585 41.58.0 16.896 10.095 31.41 24.568 37.918-.639 4.135-.99 8.328-.99 12.576.0 63.977 74.469 115.836 166.33 115.836s166.334-51.859 166.334-115.836c0-4.218-.347-8.387-.977-12.493 14.564-6.47 24.735-21.034 24.735-38.001zM326.526 373.831c-20.27 20.241-59.115 21.816-70.534 21.816-11.428.0-50.277-1.575-70.522-21.82-3.007-3.008-3.007-7.882.0-10.889 3.003-2.999 7.882-3.003 10.885.0 12.777 12.781 40.11 17.317 59.637 17.317 19.522.0 46.86-4.536 59.657-17.321 3.016-2.999 7.886-2.995 10.885.008 3.008 3.011 3.003 7.882-.008 10.889zm-5.23-48.781c-16.373.0-29.701-13.324-29.701-29.698.0-16.381 13.328-29.714 29.701-29.714 16.378.0 29.706 13.333 29.706 29.714.0 16.374-13.328 29.698-29.706 29.698zM160.91 295.348c0-16.381 13.328-29.71 29.714-29.71 16.369.0 29.689 13.329 29.689 29.71.0 16.373-13.32 29.693-29.689 29.693-16.386.0-29.714-13.32-29.714-29.693z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Quick Explainer: GPU Programming with CUDA and Triton on facebook" href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H342.978V319.085h66.6l12.672-82.621h-79.272v-53.617c0-22.603 11.073-44.636 46.58-44.636H425.6v-70.34s-32.71-5.582-63.982-5.582c-65.288.0-107.96 39.569-107.96 111.204v62.971h-72.573v82.621h72.573V512h-191.104c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Quick Explainer: GPU Programming with CUDA and Triton on whatsapp" href="https://api.whatsapp.com/send?text=Quick%20Explainer%3a%20GPU%20Programming%20with%20CUDA%20and%20Triton%20-%20https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f"><svg viewBox="0 0 512 512"><path d="M449.446.0C483.971.0 512 28.03 512 62.554v386.892C512 483.97 483.97 512 449.446 512H62.554c-34.524.0-62.554-28.03-62.554-62.554V62.554c0-34.524 28.029-62.554 62.554-62.554h386.892zm-58.673 127.703c-33.842-33.881-78.847-52.548-126.798-52.568-98.799.0-179.21 80.405-179.249 179.234-.013 31.593 8.241 62.428 23.927 89.612l-25.429 92.884 95.021-24.925c26.181 14.28 55.659 21.807 85.658 21.816h.074c98.789.0 179.206-80.413 179.247-179.243.018-47.895-18.61-92.93-52.451-126.81zM263.976 403.485h-.06c-26.734-.01-52.954-7.193-75.828-20.767l-5.441-3.229-56.386 14.792 15.05-54.977-3.542-5.637c-14.913-23.72-22.791-51.136-22.779-79.287.033-82.142 66.867-148.971 149.046-148.971 39.793.014 77.199 15.531 105.329 43.692 28.128 28.16 43.609 65.592 43.594 105.4-.034 82.149-66.866 148.983-148.983 148.984zm81.721-111.581c-4.479-2.242-26.499-13.075-30.604-14.571-4.105-1.495-7.091-2.241-10.077 2.241-2.986 4.483-11.569 14.572-14.182 17.562-2.612 2.988-5.225 3.364-9.703 1.12-4.479-2.241-18.91-6.97-36.017-22.23C231.8 264.15 222.81 249.484 220.198 245s-.279-6.908 1.963-9.14c2.016-2.007 4.48-5.232 6.719-7.847 2.24-2.615 2.986-4.484 4.479-7.472 1.493-2.99.747-5.604-.374-7.846-1.119-2.241-10.077-24.288-13.809-33.256-3.635-8.733-7.327-7.55-10.077-7.688-2.609-.13-5.598-.158-8.583-.158-2.986.0-7.839 1.121-11.944 5.604-4.105 4.484-15.675 15.32-15.675 37.364.0 22.046 16.048 43.342 18.287 46.332 2.24 2.99 31.582 48.227 76.511 67.627 10.685 4.615 19.028 7.371 25.533 9.434 10.728 3.41 20.492 2.929 28.209 1.775 8.605-1.285 26.499-10.833 30.231-21.295 3.732-10.464 3.732-19.431 2.612-21.298-1.119-1.869-4.105-2.99-8.583-5.232z"/></svg>
+</a>
+<a target=_blank rel="noopener noreferrer" aria-label="share Quick Explainer: GPU Programming with CUDA and Triton on telegram" href="https://telegram.me/share/url?text=Quick%20Explainer%3a%20GPU%20Programming%20with%20CUDA%20and%20Triton&url=https%3a%2f%2fbipinkrishnan.github.io%2fposts%2fquick-explainer-cuda-triton%2f"><svg viewBox="2 2 28 28"><path d="M26.49 29.86H5.5a3.37 3.37.0 01-2.47-1 3.35 3.35.0 01-1-2.47V5.48A3.36 3.36.0 013 3 3.37 3.37.0 015.5 2h21A3.38 3.38.0 0129 3a3.36 3.36.0 011 2.46V26.37a3.35 3.35.0 01-1 2.47 3.38 3.38.0 01-2.51 1.02zm-5.38-6.71a.79.79.0 00.85-.66L24.73 9.24a.55.55.0 00-.18-.46.62.62.0 00-.41-.17q-.08.0-16.53 6.11a.59.59.0 00-.41.59.57.57.0 00.43.52l4 1.24 1.61 4.83a.62.62.0 00.63.43.56.56.0 00.4-.17L16.54 20l4.09 3A.9.9.0 0021.11 23.15zM13.8 20.71l-1.21-4q8.72-5.55 8.78-5.55c.15.0.23.0.23.16a.18.18.0 010 .06s-2.51 2.3-7.52 6.8z"/></svg>
+</a>
+</div>
+</footer>
+</article>
+</main>
+<footer class=footer>
+<span>&copy; 2025 <a href=https://bipinkrishnan.github.io>📌PinnedNotes</a></span>
+<span>
+Powered by
+<a href=https://gohugo.io/ rel="noopener noreferrer" target=_blank>Hugo</a> &
+        <a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a>
+</span>
+</footer>
+<a href=#top aria-label="go to top" title="Go to Top (Alt + G)" class=top-link id=top-link accesskey=g><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentcolor"><path d="M12 6H0l6-6z"/></svg>
+</a>
+<script>let menu=document.getElementById('menu');menu&&(menu.scrollLeft=localStorage.getItem("menu-scroll-position"),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}),document.querySelectorAll('a[href^="#"]').forEach(a=>{a.addEventListener("click",function(b){b.preventDefault();var a=this.getAttribute("href").substr(1);window.matchMedia('(prefers-reduced-motion: reduce)').matches?document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(a)}']`).scrollIntoView({behavior:"smooth"}),a==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${a}`)})})</script>
+<script>var mybutton=document.getElementById("top-link");window.onscroll=function(){document.body.scrollTop>800||document.documentElement.scrollTop>800?(mybutton.style.visibility="visible",mybutton.style.opacity="1"):(mybutton.style.visibility="hidden",mybutton.style.opacity="0")}</script>
+<script>document.getElementById("theme-toggle").addEventListener("click",()=>{document.body.className.includes("dark")?(document.body.classList.remove('dark'),localStorage.setItem("pref-theme",'light')):(document.body.classList.add('dark'),localStorage.setItem("pref-theme",'dark'))})</script>
+<script>document.querySelectorAll('pre > code').forEach(b=>{const c=b.parentNode.parentNode,a=document.createElement('button');a.classList.add('copy-code'),a.innerHTML='copy';function d(){a.innerHTML='copied!',setTimeout(()=>{a.innerHTML='copy'},2e3)}a.addEventListener('click',e=>{if('clipboard'in navigator){navigator.clipboard.writeText(b.textContent),d();return}const a=document.createRange();a.selectNodeContents(b);const c=window.getSelection();c.removeAllRanges(),c.addRange(a);try{document.execCommand('copy'),d()}catch(a){}c.removeRange(a)}),c.classList.contains("highlight")?c.appendChild(a):c.parentNode.firstChild==c||(b.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?b.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(a):b.parentNode.appendChild(a))})</script>
+</body>
+</html>

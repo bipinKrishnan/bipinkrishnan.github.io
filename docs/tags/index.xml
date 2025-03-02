@@ -10,7 +10,25 @@
     </image>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 24 Feb 2025 22:00:49 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 01 Mar 2025 13:18:55 +0000</lastBuildDate><atom:link href="https://bipinkrishnan.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>cuda</title>
+      <link>https://bipinkrishnan.github.io/tags/cuda/</link>
+      <pubDate>Sat, 01 Mar 2025 13:18:55 +0000</pubDate>
+      
+      <guid>https://bipinkrishnan.github.io/tags/cuda/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>openai-triton</title>
+      <link>https://bipinkrishnan.github.io/tags/openai-triton/</link>
+      <pubDate>Sat, 01 Mar 2025 13:18:55 +0000</pubDate>
+      
+      <guid>https://bipinkrishnan.github.io/tags/openai-triton/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Long posts</title>
       <link>https://bipinkrishnan.github.io/tags/long-post/</link>

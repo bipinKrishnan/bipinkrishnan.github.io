@@ -1,7 +1,7 @@
 ---
 title: "Quick Explainer: GPU Programming with CUDA and Triton"
 date: 2025-03-01T13:18:55Z
-draft: true
+draft: false
 showToc: true
 TocOpen: false
 tags:
@@ -12,20 +12,20 @@ tags:
 
 ## What is CUDA and Triton?
 
-[CUDA (Compute Unified Device Architecture)](https://en.wikipedia.org/wiki/CUDA) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API that allows us to write programs that are to be executed on the GPU. In simple terms, the function that is to be executed on the GPU is called a kernel.
+[CUDA (Compute Unified Device Architecture)](https://en.wikipedia.org/wiki/CUDA) was introduced by NVIDIA to allow developers like us to directly program the GPUs. CUDA provides a low level C/C++ API for writing programs that execute on the GPU. We wrap the code to be executed on the GPU inside a function, this function is called a kernel.
 
-Not every machine learning person is an expert in using low-level programming languages provided by CUDA. This is where [OpenAI's Triton](https://github.com/triton-lang/triton) comes into play. To give you a glimpse of what Triton stands for, here is an extract from their [official release note](https://openai.com/index/triton/):
+Not every machine learning person is an expert in using low-level programming languages supported by CUDA. This is where [OpenAI's Triton](https://github.com/triton-lang/triton) comes into play. To give you a glimpse of what Triton stands for, here is an extract from their [official release note](https://openai.com/index/triton/):
 
 > We’re releasing Triton 1.0, an open-source Python-like programming language which enables researchers with no CUDA
 > experience to write highly efficient GPU code—most of the time on par with what an expert would be able to produce.
 
-The code we write in low-level CUDA and Triton is both compiled to PTX (Parallel Thread eXecution) format which is then executed on the GPU.
+The code we write in low-level CUDA and Triton are both compiled to PTX (Parallel Thread eXecution) format, before being executed on the GPU.
 
 The action plan for today is to:
 
 1. Write a simple vector addition program in standard C --- keeping it old school.
 2. Level up by re-writing the same program in CUDA C to harness the power of parallelism.
-3. Take it a step further: tweak our CUDA kernel so it can be loaded and executed seamlessly within PyTorch.
+3. Take it a step further: tweak our CUDA kernel so it can be loaded and executed seamlessly within PyTorch. This is where we make use of PyTorch C++ extension API.
 4. Finally, swap out the low-level CUDA code for Triton and use it with PyTorch.
 
 ## Simple vector addition in standard C
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Here is the equivalent C code for vector addition (save the code in `vecAdd.c`):
+Here is the equivalent C code for vector addition (save the code in `vectAdd.c`):
 
 ```C
 #include <stdio.h>
@@ -68,7 +68,7 @@ Here is the equivalent C code for vector addition (save the code in `vecAdd.c`):
 #define ARRAY_LEN 5
 
 
-// takes in 3 arrays and the number of items in the array
+// takes in 3 arrays and the number of elements in the array
 void vectAdd(int *a, int *b, int *c, int len) {
     // loop through each item in `a` and `b`, 
     // add them and append to `c`
@@ -101,20 +101,20 @@ For those who are wondering, we cannot directly print an array in C as we do in 
 have to iterate through each element in `vectC`, and print them one after the other.
 
 You can compile the C code using [`gcc`](https://gcc.gnu.org/) which comes built-in with most of the linux distros. Just run `gcc vecAdd.c -o vecAdd.out` which will create an executable
-called `vecAdd.out`. You can then run `./vecAdd.out` to print the result of vector addition.
+called `vecAdd.out`. You can then run `./vecAdd.out` to get the result of vector addition.
 
 ## Diving into CUDA
 
 ### A quick refresher on CUDA basics
 
-Now we will take it a step further and parallelize the vector addition program using CUDA. But before that we will do a quick walk through of CUDA basics. If you feel like digging into the details of anything discussed here, you can always checkout the [CUDA rferesher series](https://developer.nvidia.com/blog/tag/cuda-refresher/) from NVIDIA.
+Now we will take it a step further and parallelize the vector addition program using CUDA. But before that we will do a quick walk through of CUDA basics. If you feel like digging into the details of anything discussed here, you can always checkout the [CUDA refresher series](https://developer.nvidia.com/blog/tag/cuda-refresher/) from NVIDIA.
 
-Since we are dealing with vector addition, consider example of two vectors `A = [1, 2, 3, 4, 5]`, `B = [4, 5, 3, 3, 5]`, and an empty placeholder vector `C = []` for storing the result of vector addition. Earlier in standard C, we iterated over each element sequentially and added them. But now we have the power of parallelism since we are running our vector addition on a GPU.
+Since we are dealing with vector addition, consider the example of two vectors `A = [1, 2, 3, 4, 5]`, `B = [4, 5, 3, 3, 5]`, and an empty placeholder vector `C = []` for storing the result of vector addition. Earlier in standard C, we iterated over each element sequentially and added them. But now we have the power of parallelism since we are running our vector addition on a GPU.
 
 This is how we could parallelize vector addition of `A` and `B` using the power of threads in GPU:
 
 1. Let's start 5 threads for now since we have 5 items in `A` and `B`. Each of these 5 thread will be executed in parallel on the GPU.
-2. Each thread will only execute one operation, and that is `A[i] + B[i]` and store it in `C[i]`.
+2. In our program , each thread will only execute one operation, and that is `A[i] + B[i]` and store it in `C[i]`.
 3. For the above step, assume that `i` is the index of the thread, which will be 0 for the first thread, 1 for the second thread and so on.
 
 Here's the illustrated version of the above steps:
@@ -136,9 +136,11 @@ Result stored in output vector:
    C: [ 5   7  6  7  10 ]
 ```
 
+Thus we have a conceptual view of how we could transform a sequential program to a parallel program.
+
 Here are some technical details that you might want to know:
 
-1. In a CUDA program, the CPU is called the host and GPU is called the device. To avoid confusions and bugs, variables defined in the host are prepended with `h_` 
+1. In a CUDA program, the CPU is called the host and GPU is called the device. To avoid confusions and bugs, variable names defined in the host are prepended with `h_` 
 and variables defined in the device are prepended with `d_`. For example the variable `inpArray` defined in host should be `h_inpArray` and `inpArray` defined in device should be `d_inpArray`.
 
 2. The functions with `__host__` qualifier or without any qualifier are executed on the host and functions with `__device__` qualifier are executed on the device. The 
@@ -181,7 +183,7 @@ __global__ void randFunc4() {
 
    f. Free the device memory.
 
-Earlier in our illustrated example, we refer to 5 threads with 5 index values. We need these values to perform the addition operation. How do we get 
+Earlier in our illustrated example, we refer to 5 threads with 5 index values. We need these values to perform the addition operation. But how do we get 
 this value from inside a kernel? For this, we need to know how grids, blocks and threads are organized in the CUDA programming model. In the most simplest language, multiple
 threads are grouped together to form a block and multiple blocks are grouped together to form a grid.
 
@@ -194,13 +196,13 @@ $$
 \text{index} = \text{blockIdx.x} \times \text{blockDim.x} + \text{threadIdx.x}
 $$
 
-For the thread marked in the figure--- the block index is 1 (along X), block dimension is 5 and the thread index is 0:
+For the thread marked in the figure--- the index of the block is 2 (along X), block dimension is 5 (there are 5 threads in a block) and the thread index is 0. So, index for the kernel can be calculated as:
 
 $$
 \text{index} = 2 \times 5 + 0 = 10
 $$
 
-Thus, this thread will compute the sum of 11th element of `A` and 11th element of `B` (we only have 5 elements here though) and store the result as the 11th element of `C`.
+Thus, this thread will compute the sum of 11th element (indexing starts from 0) of `A` and 11th element of `B` (we only have 5 elements here though) and store the result as the 11th element of `C`.
 
 ### Rolling up your sleeves: Writing CUDA code for vector addition
 
@@ -233,7 +235,7 @@ Each thread in the GPU will have a copy of the above kernel and will be executed
 
 int main() {
     
-    // define the no of blocks and threads 
+    // define the no. of blocks and threads 
     // required for the kernel launch
     int nThreads = 5;
     int nBlocks = 1;
@@ -248,7 +250,7 @@ int main() {
     int *d_vectB;
     int *d_vectC;
 
-    // `int` occupies 4 bytes in memory, so `arrSize` will be 20 bytes in memory
+    // `int` occupies 4 bytes in memory, so `arrSize` will be 20 bytes
     int arrSize = sizeof(int) * ARRAY_LEN;
 
     // allocate the memory in GPU for inputs and outputs
@@ -312,6 +314,8 @@ int main() {
     return 0;
 }
 
+///////////////////// OUTPUT /////////////////////
+
 /*
     This is a sample output from running the 
     above print statements (the exact memory address may vary):
@@ -334,20 +338,20 @@ int main() {
 
 4. After the kernel execution is over and the results are copied from device to host, we call `cudaFree` to free the device memory allocated for `d_vectA`, `d_vectB` and `d_vectC`.
 
-### Using PyTorch C++ API to load CUDA kernels from the Python API
+### Using PyTorch C++ extension API to load CUDA kernels
 
 I used Google Colab for this part to skip messing up with dependency installation issues. If you are on Google Colab with GPU, run `sudo apt install ninja-build` and restart the session before running any code.
 
-We are going to use [`torch.utils.cpp_extension.load_inline`](https://pytorch.org/docs/stable/cpp_extension.html#torch.utils.cpp_extension.load_inline) to load the CUDA kernel from PyTorch.
+We are going to use [`torch.utils.cpp_extension.load_inline`](https://pytorch.org/docs/stable/cpp_extension.html#torch.utils.cpp_extension.load_inline) to load the CUDA kernel from PyTorch python API.
 
-On a high level, this is how are going to load the cuda kernel and use it from PyTorch python API (save this in ):
+On a high level, this is how are going to load the cuda kernel with PyTorch:
 
 ```python
 import torch
 from torch.utils.cpp_extension import load_inline
 
 cuda_src = # some cuda code
-cpp_src = # some cpp code
+cpp_src = # some c++ code
 
 # load the low-level CUDA and C++ code
 module = load_inline(
@@ -364,7 +368,7 @@ module = load_inline(
 x = torch.tensor([1, 2, 3, 4], dtype=torch.int, device="cuda")
 y = torch.tensor([1, 2, 6, 4], dtype=torch.int, device="cuda")
 
-# vector addition function
+# call the vector addition function
 res = module.vect_add(x, y)
 print(res)
 
@@ -379,11 +383,11 @@ This is the `cpp_src` for us:
 cpp_src = "torch::Tensor vect_add(torch::Tensor x, torch::Tensor y);"
 ```
 
-We declare the C++ function `vect_add` that takes two tensors as input and returns a tensor as output. Think of it like the template of the function that we are going to define inside `cuda_src`. The API for torch in C++ is almost similar to python where dot notations like `torch.Tensor` are replaced with `torch::Tensor`. We will see more of this when we define our function in `cuda_src` below.
+We declare the C++ function `vect_add` that takes in two tensors as input. Think of it as the template for the function that we are going to define inside `cuda_src`. The API for torch in C++ is almost similar to python, mostly the dot notations like `torch.Tensor` are replaced with `torch::Tensor`. We will see more of this when we define our function in `cuda_src` below.
 
-We will save the code for `cuda_src` in the file `vectAddTorch.cu` and then use pathlib's `read_text()` function to read it as string.
+We will save the code for `cuda_src` in the file `vectAddTorch.cu` and then use pathlib's `read_text()` function to read it as a string.
 
-This is the `cuda_src` for us:
+This is the `cuda_src` for us (save this in `vectAddTorch.cu`):
 
 ```C
 // GPU kernel
@@ -409,7 +413,7 @@ torch::Tensor vect_add(torch::Tensor x, torch::Tensor y) {
     torch::Tensor out = torch::empty_like(x);
 
     // launch the vector addition kernel
-    // pass the pointer to x, y and out along with the size
+    // pass the pointer to `x`, `y` and `out` along with the size
     vectAddKernel <<<n_blocks, n_threads>>> (x.data_ptr<int>(), y.data_ptr<int>(), out.data_ptr<int>(), size);
 
     // return the result
@@ -419,7 +423,7 @@ torch::Tensor vect_add(torch::Tensor x, torch::Tensor y) {
 
 So instead of the `main()` function from the previous iteration, we now use the power of PyTorch's C++ API to define a function `vect_add` that takes in pytorch tensors and launches the vector addition GPU kernel and returns the result as a PyTorch tensor.
 
-Let's now complete our python code to load the CUDA kernel from PyTorch:
+Let's now complete our python code to load the CUDA kernel (save this in `vectAddTorch.py`):
 
 ```python
 from pathlib import Path
@@ -427,6 +431,7 @@ from pathlib import Path
 import torch
 from torch.utils.cpp_extension import load_inline
 
+# added the `cuda_src` and `cpp_src`
 cuda_src = Path("vectAddTorch.cu").read_text()
 cpp_src = "torch::Tensor vect_add(torch::Tensor x, torch::Tensor y);"
 
@@ -454,12 +459,145 @@ print(res)
 
 ## Replacing low-level CUDA code with Triton
 
+This part will be a lot more easier since we already know the CUDA programming model. We will define a triton
+kernel using a python like syntax and use it directly from PyTorch without us having to bother about the low-level CUDA code.
 
+Every triton kernel is decorated with `triton.jit` decorator. This compiles the function just-in-time using the triton compiler. But we
+don't have to worry about this for now, we just decorate our kernel with `triton.jit` and the rest is handled by triton.
 
+Triton abstracts away the concept of threads, thus, triton functions are executed on a block of data rather than on a single element. Here is an illustration
+of how triton works when we launch a vector addition kernel with only two blocks:
 
+```
+Input Vectors:
+   A: [ 1   2   3   4 ]
+   B: [ 4   5   3   3 ]
 
+Blocks (B1 - B2) execute in parallel:
 
+   B1: C[0: 2] = A[0: 2] + B[0: 2]  →  C[0: 2] =  [ 5   7 ]
+   B2: C[2: 4] = A[2: 4] + B[2: 4]  →  C[2: 4] =  [ 6   7 ]
 
+Result stored in output vector:
+   C: [ 5   7  6  7 ]
+```
 
+Let's assume that we would like to do a vector addition of two tensors with 4 elements each. The triton kernel
+can be written as follows (save it in `vectAddTriton.py`):
 
- 
+```python
+import os
+import triton
+import triton.language as tl
+
+# env variable for debugging triton
+os.environ["TRITON_INTERPRET"] = "1"
+
+# triton kernel for vector addition
+@triton.jit
+def vect_add_kernel(
+    x_ptr, 
+    y_ptr, 
+    out_ptr,
+    BLOCK_SIZE: tl.constexpr, 
+    num_elements: int,
+):
+    # get the program id, similar to `idx` in CUDA kernel
+    pid = tl.program_id(axis=0)
+
+    # get the start and end of the block
+    block_start = pid * BLOCK_SIZE
+    offset = block_start + tl.arange(0, BLOCK_SIZE)
+    # we don't do any computation on indices where mask is false
+    mask = offset < num_elements
+
+    # load the input tensors as a block
+    x = tl.load(x_ptr + offset, mask=mask)
+    y = tl.load(y_ptr + offset, mask=mask)
+    print(x, y)
+
+    # vector addition on the loaded block of data
+    output = x + y
+    # store the output
+    tl.store(out_ptr + offset, output, mask=mask)
+```
+
+If we were to launch the above kernel with two vectors `x = [1, 2, 3, 4]` and `y = [5, 6, 7, 8]`, `BLOCK_SIZE=2` and the number of blocks as 3.
+Each of the 3 blocks will get 2 elements to run the vector addition. If we print the `pid`, `block_start`, `offset`, `mask` and data blocks while running the kernel,
+it will be as follows:
+
+```python
+### BLOCK_SIZE = 2
+### NUM_BLOCKS = 3
+### x = [1, 2, 3, 4]
+### y = [5, 6, 7, 8]
+
+PID: [0]
+Block start: [0]          # pid * BLOCK_SIZE
+Offset: [0 1]             # block_start + tl.arange(0, BLOCK_SIZE)
+Mask: [ True  True]       # offset < num_elements
+Data block from x: [1 2]
+Data block from y: [5 6]
+Output block: [6 8]
+
+PID: [1]
+Block start: [2]
+Offset: [2 3]
+Mask: [ True  True]
+Data block from x: [3 4]
+Data block from y: [7 8]
+Output block: [10 12]
+
+PID: [2]
+Block start: [4]
+Offset: [4 5]
+Mask: [False False]
+Data block from x: [0 0]
+Data block from y: [0 0]
+Output block: [0 0]
+```
+
+Finally, let's add in the function that passes the input tensors and launch the kernel
+(save it in `vectAddTriton.py`):
+
+```python
+import torch
+
+DEVICE = "cuda:0"
+BLOCK_SIZE = 2
+
+def add(x: torch.Tensor, y: torch.Tensor):
+    assert x.device == y.device == torch.device(DEVICE)
+
+    # output of vector addition is stored here
+    output = torch.empty_like(x)
+    # launch the kernel with 3 blocks along X axis 
+    # (only along X axis because we are dealing with 1D tensor here)
+    vect_add_kernel[(3,)](x, y, output, BLOCK_SIZE, num_elements=x.numel())
+    
+    return output
+
+if __name__ == "__main__":
+
+    x = torch.tensor([1, 2, 3, 4], device=DEVICE)
+    y = torch.tensor([5, 6, 7, 8], device=DEVICE)
+
+    res = add(x, y)
+    print(res)
+
+## Output: tensor([ 6,  8, 10, 12], device='cuda:0')
+```
+
+We can run the the above code including the triton kernel as a normal python script. Setting the environment variable
+`"TRITON_INTERPRET"` allows us to print stuff and set breakpoints while running the triton kernel. You can read more about debugging triton kernels [here](https://triton-lang.org/main/programming-guide/chapter-3/debugging.html).
+
+We finally made it to the end of this post after going through a whole lot of C, CUDA, C++ and Triton. This was just a glimpse of the huge GPU programming landscape. I've deliberately left the kernel profiling and benchmarking
+steps, this can be considered as a potential next step for the readers.
+
+All the code used in this post can found [here](https://github.com/bipinKrishnan/ml_engineering/tree/main/cuda_beginner).
+
+## Useful resources
+
+[1] [“Gpu-Mode/Lectures: Material for Gpu-Mode Lectures”](https://github.com/gpu-mode/lectures). GitHub. 2025.
+
+[2] [“Vector Addition — Triton Documentation”](https://triton-lang.org/main/getting-started/tutorials/01-vector-add.html). Triton-Lang.org. 2020.
